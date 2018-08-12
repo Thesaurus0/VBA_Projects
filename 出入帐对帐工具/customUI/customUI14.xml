@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="ERP_UI_Onload"> 
+	<ribbon startFromScratch="false">
+		<tabs>
+			<tab id="ERP_2010" label="入帐出帐汇总">
+				<group id="grpSummAmount" label="计算出入帐余额">
+					<button id="btnCalSummaryAmount" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+					<separator id="spSummAmount01"/> 
+					<toggleButton id="tbtnShowSummaryAmount" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtSummaryAmount" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+				</group> 
+				<group id="grpInputSheets" label="输入数据表">
+					<toggleButton id="tbtnShowshtBillIn" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtBillIn" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+					<toggleButton id="tbtnShowshtBillOut" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtBillOut" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+				</group> 
+			</tab>
+			<tab id="ERP_201002" label="明细汇总">
+				<group id="grpSummBusinessData" label="明细汇总">
+					<button id="btnSummaryBusinessData" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+					<separator id="spBusinessData01"/> 
+					<toggleButton id="tbtnShowshtBusinessSumm" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtBusinessSumm" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+				</group> 
+				<group id="grpInputSheets02" label="输入数据表">
+					<toggleButton id="tbtnShowshtBusinessDetails" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtBusinessDetails" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+				</group> 
+				<group id="grpMisc" label="清除">
+					<button id="btnClearData" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+				</group> 
+			</tab>
+		</tabs>
+	</ribbon>
+</customUI>

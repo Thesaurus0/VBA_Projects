@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="ERP_UI_Onload"> 
+	<ribbon startFromScratch="false">
+		<tabs>
+			<tab id="ERP_2010" label="Auto Read Figure">
+				<group id="grpAutoRead" label="Auto Read Figure">
+					<button id="btnAutoReadFigure" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+				</group>  
+			</tab> 
+		</tabs>
+	</ribbon>
+</customUI>
