@@ -181,28 +181,31 @@ Function fSetConditionalFormatForBorders()
     Call fDeleteAllConditionFormatFromSheet(sht)
 '    Call fSetConditionFormatForOddEvenLine(sht, , , , arrKeysCols, bExtendToMore10ThousRows)
     Call fSetConditionFormatForBorders(sht, , 7, , 1)
+    sht.Cells.WrapText = True
+    fGetRangeByStartEndPos(sht, 7, 1, fGetValidMaxRow(sht), 1).EntireRow.AutoFit
     
     Set sht = shtCabinetFrame
     Call fDeleteAllConditionFormatFromSheet(sht)
 '    Call fSetConditionFormatForOddEvenLine(sht, , , , arrKeysCols, bExtendToMore10ThousRows)
     Call fSetConditionFormatForBorders(sht, , 7, , 1)
+    sht.Cells.WrapText = True
+    fGetRangeByStartEndPos(sht, 7, 1, fGetValidMaxRow(sht), 1).EntireRow.AutoFit
     
     Set sht = shtDoor
     Call fDeleteAllConditionFormatFromSheet(sht)
 '    Call fSetConditionFormatForOddEvenLine(sht, , , , arrKeysCols, bExtendToMore10ThousRows)
     Call fSetConditionFormatForBorders(sht, , 7, , 1)
+    sht.Cells.WrapText = True
+    fGetRangeByStartEndPos(sht, 7, 1, fGetValidMaxRow(sht), 1).EntireRow.AutoFit
     
     Set sht = shtHardwares
     Call fDeleteAllConditionFormatFromSheet(sht)
 '    Call fSetConditionFormatForOddEvenLine(sht, , , , arrKeysCols, bExtendToMore10ThousRows)
     Call fSetConditionFormatForBorders(sht, , 7, , 1)
-    Set sht = Nothing
+    sht.Cells.WrapText = True
+    fGetRangeByStartEndPos(sht, 7, 1, fGetValidMaxRow(sht), 1).EntireRow.AutoFit
     
-    Call fShowSheet(shtRawData)
-    Call fShowSheet(shtCabinet)
-    Call fShowSheet(shtCabinetFrame)
-    Call fShowSheet(shtDoor)
-    Call fShowSheet(shtHardwares)
+    Set sht = Nothing
 End Function
 
 Private Function fSetConditionFormatForBorders(ByRef shtParam As Worksheet, Optional lMaxCol As Long = 0 _

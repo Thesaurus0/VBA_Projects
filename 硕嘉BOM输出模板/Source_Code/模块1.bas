@@ -5,6 +5,12 @@ StartTime = Timer
 Application.ScreenUpdating = False
 
 
+    
+    Call fShowSheet(shtRawData)
+    Call fShowSheet(shtCabinet)
+    Call fShowSheet(shtCabinetFrame)
+    Call fShowSheet(shtDoor)
+    Call fShowSheet(shtHardwares)
 
 Dim num1 As Integer 'Ñ­»·µÚÒ»±é
 Dim num2 As Integer

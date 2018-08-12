@@ -9,6 +9,12 @@ Dim foundrow5 As Integer
 
 
 
+    
+    Call fShowSheet(shtRawData)
+    Call fShowSheet(shtCabinet)
+    Call fShowSheet(shtCabinetFrame)
+    Call fShowSheet(shtDoor)
+    Call fShowSheet(shtHardwares)
 
 Set sh1 = Worksheets("TopSolid原始数据")
 Set sh2 = Worksheets("柜体清单")
