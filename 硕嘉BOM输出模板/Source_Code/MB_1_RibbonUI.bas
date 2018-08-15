@@ -49,6 +49,14 @@ End Sub
 Sub Button_getSize(control As IRibbonControl, ByRef size)
     Call fGetControlAttributes(control, "SIZE", size)
 End Sub
+Sub Button_getScreentip(control As IRibbonControl, ByRef Screentip)
+    Call fGetControlAttributes(control, "SCREENTIP", Screentip)
+End Sub
+Sub Button_getSupertip(control As IRibbonControl, ByRef Supertip)
+    Call fGetControlAttributes(control, "SUPERTIP", Supertip)
+End Sub
+
+
 
 '================== toggle button common function===========================================
 Sub ToggleButtonToSwitchSheet_onAction(control As IRibbonControl, pressed As Boolean)
@@ -144,7 +152,7 @@ End Sub
 '------------------------------------------------------------------------------
  
 Function fGetControlAttributes(control As IRibbonControl, sType As String, Optional ByRef val)
-    If Not (sType = "LABEL" Or sType = "IMAGE" Or sType = "SIZE" Or sType = "ACTION") Then
+    If Not (sType = "LABEL" Or sType = "IMAGE" Or sType = "SIZE" Or sType = "ACTION" Or sType = "SCREENTIP" Or sType = "SUPERTIP") Then
         fErr "wrong param to fGetControlAttributes: " & vbCr & "sType=" & sType & vbCr & "control=" & control.id
     End If
     
@@ -155,7 +163,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FunctionWizard"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -168,7 +176,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FilePrint"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -181,7 +189,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "ChartShowData"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -194,7 +202,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FileSaveAsExcelXlsx"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -207,7 +215,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FileSaveAsExcelXlsx"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -220,7 +228,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FileSaveAsExcelXlsx"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -233,7 +241,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "FileSaveAsExcelXlsx"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
@@ -247,15 +255,34 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "IMAGE":   val = "ReviewRejectChange"
                 Case "SIZE":        val = "true"    'large=true, normal=false
                 Case "SHOW_IMAGE":  val = "true"
-                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":    val = ""
                 Case "SUPERTIP":    val = ""
                 Case "SCREENTIP":   val = ""
                 
                 Case "ENABLED":     val = True
                 Case "ACTION":      Call subMain_ClearBuzDetails
             End Select
+        Case "btnOpenFileFolder"
+            Select Case sType
+                Case "LABEL":   val = "打开文件所在目录"
+                Case "IMAGE":   val = "FileOpen"
+                Case "SIZE":        val = "true"    'large=true, normal=false
+                Case "SHOW_IMAGE":  val = "true"
+                Case "SUPERTIP":    val = ""
+                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":   val = ""
+                
+                Case "ENABLED":     val = True
+                Case "ACTION":      Call subMain_OpenAcitveWorkbookLocation
+            End Select
 
     End Select
     
 End Function
  
+
+Sub subMain_OpenAcitveWorkbookLocation()
+    If Workbooks.Count <= 0 Then Exit Sub
+    
+    Call fOpenAcitveWorkbookLocation
+End Sub

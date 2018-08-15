@@ -41,7 +41,7 @@ Function fOpenFile(asFileFullPath As String)
     Const SE_ERR_NOASSOC = 31&
     Const ERROR_BAD_FORMAT = 11&
 
-    lReturnVal = ShellExecute(Application.hwnd, "Open", asFileFullPath, "", "C:\", SW_SHOWNORMAL)
+    lReturnVal = ShellExecute(Application.hwnd, "Open", asFileFullPath, "", "C:\", SW_SHOWMAXIMIZED)
     
     If lReturnVal <= 32 Then
         Select Case lReturnVal

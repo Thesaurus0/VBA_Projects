@@ -17,7 +17,7 @@ Dim num2 As Integer
 Dim num3 As Integer
 Dim num4 As Integer
 Dim num0 As Integer
-Dim c1 As Integer       '合计
+Dim c1 As Double    'Integer       '合计
 Dim c2 As Double
 Dim c3 As Double
 Dim c4 As Double
@@ -779,6 +779,7 @@ Next num9
 
 
 Call fSetConditionalFormatForBorders
+Call fSetRowHeightForAllReportSheets
 
 
 Application.ScreenUpdating = True

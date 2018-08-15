@@ -10,6 +10,10 @@ Attribute VB_Exposed = True
 Option Explicit
 Option Base 1
 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Call fShowSheet(shtRawData)
+End Sub
+
 Private Sub Workbook_Open()
     Application.EnableEvents = False
     Call sub_WorkBookInitialization
@@ -18,7 +22,8 @@ Private Sub Workbook_Open()
 End Sub
 
 Sub sub_WorkBookInitialization()
-    Call fHideSheet(shtRawData)
+    'Call fHideSheet(shtRawData)
+    Call fShowSheet(shtRawData)
     Call fHideSheet(shtCabinet)
     Call fHideSheet(shtCabinetFrame)
     Call fHideSheet(shtDoor)

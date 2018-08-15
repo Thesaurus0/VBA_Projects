@@ -1462,7 +1462,7 @@ Function fSetConditionFormatForOddEvenLine(ByRef shtParam As Worksheet, Optional
                 sKeyColsFormula = sKeyColsFormula & "," & "len(trim($" & sColLetter & lRowFrom & ")) > 0"
             Next
             If Len(sKeyColsFormula) > 0 Then sKeyColsFormula = Right(sKeyColsFormula, Len(sKeyColsFormula) - 1)
-            sKeyColsFormula = sKeyColsFormula & ","
+            sKeyColsFormula = sKeyColsFormula
         Else
             sColLetter = fNum2Letter(arrKeyColsNotBlank)
             sKeyColsFormula = "len(trim($" & sColLetter & lRowFrom & ")) > 0"
@@ -1532,7 +1532,7 @@ Function fSetConditionFormatForBorders(ByRef shtParam As Worksheet, Optional lMa
         Else
             sColLetter = fNum2Letter(arrKeyColsNotBlank)
             sKeyColsFormula = "len(trim($" & sColLetter & lRowFrom & ")) > 0"
-            sKeyColsFormula = sKeyColsFormula & ","
+            sKeyColsFormula = sKeyColsFormula
         End If
     Else
         sKeyColsFormula = ""

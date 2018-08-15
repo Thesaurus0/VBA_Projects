@@ -835,3 +835,17 @@ Function fDeleteRemoveDataFormatFromSheetLeaveHeader(ByRef shtParam As Worksheet
         End With
     End If
 End Function
+
+Function fOpenAcitveWorkbookLocation(Optional wb As Workbook)
+    Dim wbIsnothing   As Boolean
+    
+    wbIsnothing = CBool(wb Is Nothing)
+    If wbIsnothing Then Set wb = ActiveWorkbook
+    
+    If Len(wb.Path) <= 0 Then Exit Function
+     
+    Call fOpenFile(wb.Path)
+    
+    If wbIsnothing Then Set wb = Nothing
+End Function
+ 
