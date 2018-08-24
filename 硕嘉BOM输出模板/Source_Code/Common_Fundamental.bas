@@ -696,7 +696,7 @@ Function fArrayRowIsBlankHasNoData(arr, alRow As Long) As Boolean
 End Function
 
 Function fGenRandomUniqueString() As String
-    fGenRandomUniqueString = format(Now(), "yyyymmddhhMMSS") & Rnd()
+    fGenRandomUniqueString = Format(Now(), "yyyymmddhhMMSS") & Rnd()
 End Function
 
 Function fSplit(asOrig As String, Optional asSeparators As String = "") As Variant
@@ -2129,7 +2129,7 @@ exit_fun:
     fFileterTwoDimensionArray = arrOut
     Erase arrOut
     
-    Debug.Print "fFileterOutTwoDimensionArray: " & format(Timer - start, "00:00")
+    Debug.Print "fFileterOutTwoDimensionArray: " & Format(Timer - start, "00:00")
 End Function
 
 Function fFileterOutTwoDimensionArray(arrSource(), lCol As Long, sValue) As Variant
@@ -2174,7 +2174,7 @@ exit_fun:
     fFileterOutTwoDimensionArray = arrOut
     Erase arrOut
     
-    Debug.Print "fFileterOutTwoDimensionArray: " & Timer - start & vbCr & format(Timer - start, "00:00")
+    Debug.Print "fFileterOutTwoDimensionArray: " & Timer - start & vbCr & Format(Timer - start, "00:00")
 End Function
 Function fTranspose1DimenArrayTo2DimenArrayVertically(arrParam) As Variant
     Dim i As Long
@@ -2508,13 +2508,13 @@ Function fReplaceDatePattern(ByRef sToReplace As String, aDate As Date) As Strin
     sNewStr = ""
     lPrevEndPos = 0
     For Each oMatch In oMatchCollection
-        sDatePattern = oMatch.Value
+        sDatePattern = oMatch.value
         
         lStartPos = oMatch.FirstIndex + 1
         lEndPos = oMatch.FirstIndex + oMatch.length
         lLen = oMatch.length
         
-        sDate = format(aDate, sDatePattern)
+        sDate = Format(aDate, sDatePattern)
         
         If Len(sNewStr) <= 0 Then
             sNewStr = Left(sToReplace, lStartPos - 1) & sDate

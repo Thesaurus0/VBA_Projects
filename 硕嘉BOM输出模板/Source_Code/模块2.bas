@@ -29,7 +29,7 @@ foundrow5 = 1
 
 
 For num0 = 2 To sh2.Range("C65536").End(xlUp).Row Step 1
-    If sh2.Cells(num0, "C").Value <> "" Then
+    If sh2.Cells(num0, "C").value <> "" Then
         foundrow2 = num0
     End If
 Next num0
@@ -37,7 +37,7 @@ Next num0
 
 
 For num0 = 2 To sh3.Range("C65536").End(xlUp).Row Step 1
-    If sh3.Cells(num0, "C").Value <> "" Then
+    If sh3.Cells(num0, "C").value <> "" Then
         foundrow3 = num0
     End If
 Next num0
@@ -45,14 +45,14 @@ Next num0
 
 
 For num0 = 2 To sh4.Range("C65536").End(xlUp).Row Step 1
-    If sh4.Cells(num0, "C").Value <> "" Then
+    If sh4.Cells(num0, "C").value <> "" Then
         foundrow4 = num0
     End If
 Next num0
 
 
 For num0 = 2 To sh5.Range("C65536").End(xlUp).Row Step 1
-    If sh5.Cells(num0, "C").Value <> "" Then
+    If sh5.Cells(num0, "C").value <> "" Then
         foundrow5 = num0
     End If
 Next num0

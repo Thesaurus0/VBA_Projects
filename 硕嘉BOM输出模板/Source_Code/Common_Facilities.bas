@@ -11,7 +11,7 @@ Function fStartTimer()
     dblStartTime = Timer
 End Function
 Function fHowLong(Optional ByVal asPrefix As String = "")
-    Debug.Print IIf(Len(asPrefix) > 0, asPrefix & vbTab, "") & format(Timer - dblStartTime, "0000.00000000")
+    Debug.Print IIf(Len(asPrefix) > 0, asPrefix & vbTab, "") & Format(Timer - dblStartTime, "0000.00000000")
 End Function
 
 Function fKeepCopyContent()
@@ -53,7 +53,7 @@ Function fKeepCopyContent()
         
         shtActiveOrig.Activate
     ElseIf bCopyType = "COPY_OTHERS" Then
-        shtDataStage.Range(PASTE_START_CELL).Value = sCopiedStr
+        shtDataStage.Range(PASTE_START_CELL).value = sCopiedStr
         sCopyStageRangeAddr = ""
     ElseIf bCopyType = "NOTHING" Then
         shtDataStage.Range(PASTE_START_CELL).ClearComments
@@ -80,7 +80,7 @@ Function fCopyFromKept()
         shtDataStage.Range(sCopyStageRangeAddr).Cut
     ElseIf bCopyType = "COPY_OTHERS" Then
         Set myData = New DataObject
-        myData.SetText CStr(shtDataStage.Range(PASTE_START_CELL).Value)
+        myData.SetText CStr(shtDataStage.Range(PASTE_START_CELL).value)
         myData.PutInClipboard
         Set myData = Nothing
     ElseIf bCopyType = "NOTHING" Then
@@ -266,12 +266,12 @@ Function fSetDEVUATPRODNotificationInSheetMenu()
     Else
     End If
     
-    shtMenu.Range("A1").Value = sNotifi
+    shtMenu.Range("A1").value = sNotifi
     shtMenu.Range("A1").Font.size = iFontSize
     shtMenu.Range("A1").Font.Color = iColor
     shtMenu.Range("A1").Font.Bold = bBold
     
-    shtMenuCompInvt.Range("A1").Value = sNotifi
+    shtMenuCompInvt.Range("A1").value = sNotifi
     shtMenuCompInvt.Range("A1").Font.size = iFontSize
     shtMenuCompInvt.Range("A1").Font.Color = iColor
     shtMenuCompInvt.Range("A1").Font.Bold = bBold
@@ -424,7 +424,7 @@ Function fShtSysConf_SheetChange_DevProdChange(Target As Range)
     If Not rgIntersect Is Nothing Then
         If rgIntersect.Areas.Count > 1 Then fErr "Please select only one cell."
         
-        gsEnv = rgIntersect.Value
+        gsEnv = rgIntersect.value
         
         Call fRemoveAllCommandbarsByConfig
         Call ThisWorkbook.sub_WorkBookInitialization
@@ -473,7 +473,7 @@ Sub sub_GenAlpabetList()
         arrList(i, 1) = fNum2Letter(i)
     Next
     
-    ActiveCell.Resize(UBound(arrList, 1), 1).Value = arrList
+    ActiveCell.Resize(UBound(arrList, 1), 1).value = arrList
     Erase arrList
 End Sub
 
@@ -505,7 +505,7 @@ Sub sub_GenNumberList()
         arrList(i, 1) = i
     Next
     
-    ActiveCell.Resize(UBound(arrList, 1), 1).Value = arrList
+    ActiveCell.Resize(UBound(arrList, 1), 1).value = arrList
     Erase arrList
 
 End Sub
@@ -574,7 +574,7 @@ Sub Sub_FilterByActiveCell()
     
     Dim aActiveCellValue
     Dim lColToFilter As Long
-    aActiveCellValue = ActiveCell.Value
+    aActiveCellValue = ActiveCell.value
     lColToFilter = ActiveCell.Column
     
     fGetRangeByStartEndPos(ActiveSheet, 1, 1, lMaxRow, lMaxCol).AutoFilter _
@@ -620,13 +620,13 @@ Sub Sub_FilterBySelectedCells()
         For Each eachCell In rngEachArea
             If eachCell.Column > lMaxCol Then Exit For
             
-            If IsNumeric(eachCell.Value) Then
+            If IsNumeric(eachCell.value) Then
                 rgData.AutoFilter Field:=eachCell.Column _
-                                , Criteria1:=eachCell.Value _
+                                , Criteria1:=eachCell.value _
                                 , Operator:=xlAnd
             Else
                 rgData.AutoFilter Field:=eachCell.Column _
-                                , Criteria1:="=*" & eachCell.Value & "*" _
+                                , Criteria1:="=*" & eachCell.value & "*" _
                                 , Operator:=xlAnd
             End If
         Next
@@ -641,7 +641,7 @@ End Sub
 Sub sub_SortBySelectColumn()
     Dim sSelectContent As String
     Dim lSelectCol As Long
-    sSelectContent = ActiveCell.Value
+    sSelectContent = ActiveCell.value
     lSelectCol = ActiveCell.Column
     
     Call Sub_RemoveFilterForAcitveSheet
@@ -665,7 +665,7 @@ Sub sub_SortBySelectedCells()
 '        End
 '    End If
     
-    sFirstValue = rngSelected.Cells(1, 1).Value
+    sFirstValue = rngSelected.Cells(1, 1).value
 
     Call Sub_RemoveFilterForAcitveSheet
     
@@ -706,7 +706,7 @@ Sub sub_SortBySelectedCells()
     Dim rgFound As Range
     Set rgFound = fFindInWorksheet(ActiveSheet.Cells, CStr(sFirstValue), True, True)
     
-    Debug.Print rngSelected.Cells(1, 1).Value
+    Debug.Print rngSelected.Cells(1, 1).value
     If Not rgFound Is Nothing Then rgFound.Select
     Set rgFound = Nothing
     End

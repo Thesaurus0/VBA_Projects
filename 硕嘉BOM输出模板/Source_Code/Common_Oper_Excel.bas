@@ -10,8 +10,8 @@ Function fOpenFileSelectDialogAndSetToSheetRange(rngAddrOrName As String _
     
     If shtParam Is Nothing Then Set shtParam = shtMenu
     
-    sFile = fSelectFileDialog(Trim(shtParam.Range(rngAddrOrName).Value), , asTitle)
-    If Len(sFile) > 0 Then shtParam.Range(rngAddrOrName).Value = sFile
+    sFile = fSelectFileDialog(Trim(shtParam.Range(rngAddrOrName).value), , asTitle)
+    If Len(sFile) > 0 Then shtParam.Range(rngAddrOrName).value = sFile
 End Function
 
 Function fFindInWorksheet(rngToFindIn As Range, sWhatToFind As String _
@@ -91,9 +91,9 @@ Function fReadRangeDataToArray(rngParam As Range) As Variant
     
     If fRangeIsSingleCell(rngParam) Then
         ReDim arrOut(1 To 1, 1 To 1)
-        arrOut(1, 1) = rngParam.Value
+        arrOut(1, 1) = rngParam.value
     Else
-        arrOut = rngParam.Value
+        arrOut = rngParam.value
     End If
     
     fReadRangeDataToArray = arrOut
@@ -106,14 +106,14 @@ Function fSetSpecifiedConfigCellValue(shtConfig As Worksheet, asTag As String, a
                                 )
     Dim sAddr As String
     sAddr = fGetSpecifiedConfigCellAddress(shtConfig, asTag, asRtnCol, asCriteria, False, bDevUatProd)
-    shtConfig.Range(sAddr).Value = sValue
+    shtConfig.Range(sAddr).value = sValue
 End Function
 Function fGetSpecifiedConfigCellValue(shtConfig As Worksheet, asTag As String, asRtnCol As String, asCriteria As String _
                                 , Optional bDevUatProd As Boolean = False _
                                 )
     Dim sAddr As String
     sAddr = fGetSpecifiedConfigCellAddress(shtConfig, asTag, asRtnCol, asCriteria, False, bDevUatProd)
-    fGetSpecifiedConfigCellValue = shtConfig.Range(sAddr).Value
+    fGetSpecifiedConfigCellValue = shtConfig.Range(sAddr).value
 End Function
 Function fGetSpecifiedConfigCellAddress(shtConfig As Worksheet, asTag As String, asRtnCol As String _
                                 , asCriteria As String _
@@ -257,7 +257,7 @@ Function fWriteArray2Sheet(sht As Worksheet, arrData, Optional lStartRow As Long
         fErr "Wrong array to paste to sheet: fGetArrayDimension(arrData) <> 2"
     End If
     
-    sht.Cells(lStartRow, lStartCol).Resize(UBound(arrData, 1), UBound(arrData, 2)).Value = arrData
+    sht.Cells(lStartRow, lStartCol).Resize(UBound(arrData, 1), UBound(arrData, 2)).value = arrData
 End Function
 
 Function fAppendArray2Sheet(sht As Worksheet, ByRef arrData, Optional lStartCol As Long = 1, Optional bEraseArray As Boolean = True)
@@ -270,7 +270,7 @@ Function fAppendArray2Sheet(sht As Worksheet, ByRef arrData, Optional lStartCol 
     Dim lFromRow As Long
     lFromRow = fGetValidMaxRow(sht) + 1
     
-    sht.Cells(lFromRow, lStartCol).Resize(UBound(arrData, 1), UBound(arrData, 2)).Value = arrData
+    sht.Cells(lFromRow, lStartCol).Resize(UBound(arrData, 1), UBound(arrData, 2)).value = arrData
     If bEraseArray Then Erase arrData
 End Function
 
@@ -349,7 +349,7 @@ Function fDeleteBlankRowsFromSheet(sht As Worksheet)
     lValidMaxRow = fGetValidMaxRow(sht)
     
     If lUsedRangMaxRow > lValidMaxRow Then
-        sht.Rows((lValidMaxRow + 1) & ":" & lUsedRangMaxRow).Delete shift:=xlUp
+        sht.Rows((lValidMaxRow + 1) & ":" & lUsedRangMaxRow).Delete Shift:=xlUp
     End If
 End Function
 Function fRemoveFilterForSheet(sht As Worksheet, Optional ByVal asDegree As String = "SHOW_ALL_DATA")
@@ -966,7 +966,7 @@ Function fDeleteRowsFromSheetLeaveHeader(ByRef sht As Worksheet, Optional lHeade
     lMaxRow = sht.Range("A1").SpecialCells(xlCellTypeLastCell).Row
     
     If lMaxRow > lHeaderByRow Then
-        sht.Rows(lHeaderByRow + 1 & ":" & lMaxRow).Delete shift:=xlUp
+        sht.Rows(lHeaderByRow + 1 & ":" & lMaxRow).Delete Shift:=xlUp
         Application.GoTo sht.Cells(lHeaderByRow + 1, 1), True
     End If
     

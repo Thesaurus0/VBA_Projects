@@ -19,19 +19,19 @@ Function fSetRowHeightForAllReportSheets()
     Set sht = shtCabinetFrame
     lMaxRow = fGetValidMaxRow(sht)
     If lMaxRow >= 7 Then
-        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 15)
+        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 20)
     End If
     
     Set sht = shtDoor
     lMaxRow = fGetValidMaxRow(sht)
     If lMaxRow >= 7 Then
-        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 15)
+        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 20)
     End If
     
     Set sht = shtHardwares
     lMaxRow = fGetValidMaxRow(sht)
     If lMaxRow >= 7 Then
-        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 15)
+        Call fSetRowHeightForExceedingThreshold(sht, 7, lMaxRow, 20)
     End If
     
     Set sht = Nothing
@@ -201,32 +201,32 @@ Function subMain_ClearBuzDetails()
     Set sht = shtRawData
     lMaxRow = sht.UsedRange.Row + sht.UsedRange.Rows.Count - 1
     If lMaxRow >= 1 Then
-        fGetRangeByStartEndPos(sht, 1, 1, lMaxRow, 1).EntireRow.Delete shift:=xlUp
+        fGetRangeByStartEndPos(sht, 1, 1, lMaxRow, 1).EntireRow.Delete Shift:=xlUp
     End If
     
     Set sht = shtCabinet
     lMaxRow = sht.UsedRange.Row + sht.UsedRange.Rows.Count - 1
     If lMaxRow >= 7 Then
-        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete shift:=xlUp
+        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete Shift:=xlUp
     End If
     
     Set sht = shtCabinetFrame
     lMaxRow = sht.UsedRange.Row + sht.UsedRange.Rows.Count - 1
     If lMaxRow >= 7 Then
-        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete shift:=xlUp
+        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete Shift:=xlUp
     End If
     
     
     Set sht = shtDoor
     lMaxRow = sht.UsedRange.Row + sht.UsedRange.Rows.Count - 1
     If lMaxRow >= 7 Then
-        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete shift:=xlUp
+        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete Shift:=xlUp
     End If
     
     Set sht = shtHardwares
     lMaxRow = sht.UsedRange.Row + sht.UsedRange.Rows.Count - 1
     If lMaxRow >= 7 Then
-        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete shift:=xlUp
+        fGetRangeByStartEndPos(sht, 7, 1, lMaxRow, 1).EntireRow.Delete Shift:=xlUp
     End If
     
     Set sht = Nothing

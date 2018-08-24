@@ -54,7 +54,7 @@ Function fConvertFomulaToValueForSheetIfAny(sht As Worksheet)
 '        eachRng.Value = eachRng.Value
 '    Next
 
-    rng.Parent.UsedRange.Value = rng.Parent.UsedRange.Value
+    rng.Parent.UsedRange.value = rng.Parent.UsedRange.value
 End Function
 
 Function fSaveAndCloseWorkBook(wb As Workbook)
@@ -380,11 +380,11 @@ Function fGetTableLevelConfig(rngConfigBlock As Range, asTableLevelConf As Strin
     
     Set rgTarget = rgFound.Offset(0, lValueColSameAsDisplayName - rgFound.Column)
     
-    If fZero(rgTarget.Value) Then
+    If fZero(rgTarget.value) Then
         fErr "asTableLevelConf cannot be blank in " & shtParent.name & vbCr & "range: " & rngConfigBlock.Address
     End If
     
-    fGetTableLevelConfig = Trim(rgTarget.Value)
+    fGetTableLevelConfig = Trim(rgTarget.value)
     Set rgTarget = Nothing
     Set rgFound = Nothing
     Set shtParent = Nothing
@@ -1021,7 +1021,7 @@ Function fPrepareOutputSheetHeaderAndTextColumns(shtOutput As Worksheet)
             End If
         Next
     Next
-    shtOutput.Range("A1").Resize(1, lMaxCol).Value = arrHeader
+    shtOutput.Range("A1").Resize(1, lMaxCol).value = arrHeader
     Erase arrHeader
     
     Dim rgHeader As Range
@@ -1086,7 +1086,7 @@ Function fDeleteNotShowUpColumns(ByRef shtOutput As Worksheet)
         sColType = dictRptColAttr(sColTech)
         
         If sColType = "NOT_SHOW_UP" Then
-            shtOutput.Columns(dictRptColIndex.Items(i)).Delete shift:=xlToLeft
+            shtOutput.Columns(dictRptColIndex.Items(i)).Delete Shift:=xlToLeft
         End If
 next_col:
     Next
@@ -1109,7 +1109,7 @@ Function fCleanSheetOutputResetSheetOutput(ByRef shtOutput As Worksheet)
     shtOutput.Cells.ClearFormats
     shtOutput.Cells.ClearContents
     shtOutput.Cells.ClearContents
-    shtOutput.UsedRange.Delete shift:=xlUp
+    shtOutput.UsedRange.Delete Shift:=xlUp
 End Function
 
 Function fClearDataFromSheetLeaveHeader(ByRef shtOutput As Worksheet)
@@ -1362,10 +1362,10 @@ Function fSetBackNumberFormat2TextForCols(ByRef shtOutput As Worksheet _
                 arrData = fReadRangeDatatoArrayByStartEndPos(shtOutput, lRowFrom, lEachCol, lRowTo, lRowTo)
                 
                 For lEachRow = LBound(arrData, 1) To UBound(arrData, 1)
-                    arrData(lEachRow, 1) = format(arrData(lEachRow, 1), sFormat)
+                    arrData(lEachRow, 1) = Format(arrData(lEachRow, 1), sFormat)
                 Next
                 
-                shtOutput.Cells(lRowFrom, lEachCol).Resize(UBound(arrData, 1), 1).Value = arrData
+                shtOutput.Cells(lRowFrom, lEachCol).Resize(UBound(arrData, 1), 1).value = arrData
             End If
         End If
 next_col:
@@ -1645,7 +1645,7 @@ Function fPrepareHeaderToSheet(shtParam As Worksheet, arrHeaders, Optional alHea
         arrHeaderHorizontal(1, iV) = arrHeaders(i)
     Next
     
-    shtParam.Cells(alHeaderAtRow, 1).Resize(1, iV).Value = arrHeaderHorizontal
+    shtParam.Cells(alHeaderAtRow, 1).Resize(1, iV).value = arrHeaderHorizontal
     Erase arrHeaderHorizontal
     Erase arrHeaders
 End Function

@@ -17,7 +17,7 @@ Function fSetBackToConfigSheetAndUpdategDict_UserTicket()
          
         If Not fActiveXControlExistsInSheet(shtCurrMenu, fGetCompany_CheckBoxName(sCompanyID), ckb) Then GoTo next_company
         
-        sTickValue = IIf(ckb.Value, "Y", "N")
+        sTickValue = IIf(ckb.value, "Y", "N")
         
         Call fSetSpecifiedConfigCellValue(shtStaticData, "[Sales Company List]", "User Ticked", "Company ID=" & sCompanyID, sTickValue)
         Call fUpdateDictionaryItemValueForDelimitedElement(dictCompList, sCompanyID, Company.Selected - Company.REPORT_ID, sTickValue)
@@ -37,7 +37,7 @@ Function fSetBackToConfigSheetAndUpdategDict_InputFiles()
         
         If fGetCompany_UserTicked(sEachCompanyID) = "Y" Then
             sFilePathRange = fGetCompany_InputFileTextBoxName(sEachCompanyID)
-            sEachFilePath = Trim(shtCurrMenu.Range(sFilePathRange).Value)
+            sEachFilePath = Trim(shtCurrMenu.Range(sFilePathRange).value)
         Else
             sEachFilePath = "User not selected."
         End If
