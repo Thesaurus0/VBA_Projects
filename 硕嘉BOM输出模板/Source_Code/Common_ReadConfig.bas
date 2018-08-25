@@ -25,6 +25,8 @@ Function fFindAllColumnsIndexByColNames(rngToFindIn As Range, arrColsName, ByRef
     
     ReDim arrColsIndex(LBound(arrColsName) To UBound(arrColsName))
     
+    Debug.Print "ASDFASDFASDF"
+    
     Dim lColAtRow As Long
     Dim lEachCol As Long
     Dim sEachColName As String

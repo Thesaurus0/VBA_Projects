@@ -72,7 +72,8 @@ Function fOpenFile(asFileFullPath As String)
             Case Else
                 msg = "Unknown error"
         End Select
-        
+        Debug.Print "ASDFASDFASDF"
+    
         fErr msg
     End If
 End Function
