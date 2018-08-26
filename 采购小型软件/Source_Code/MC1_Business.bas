@@ -134,6 +134,7 @@ reset_excel_options:
 End Sub
 
 
+
 Function fReadVendorPrice(arrVendorPrices(), dictUniquePrice As Dictionary, dictMultiPrice As Dictionary)
     Dim lEachRow As Long
     Dim sProd As String
@@ -467,3 +468,215 @@ Function fExtractProductFromPriceConfigSheet()
     Erase arrData
     Set dictProd = Nothing
 End Function
+
+Sub subMain_GenPurchaseODByVendor()
+    Dim arrOutput()
+    Dim dictLog As Dictionary
+    Dim lEachRow As Long
+    'Dim lMaxRow As Long
+    Dim i As Long
+    Dim j As Long
+    Dim sMsg As String
+    Dim sVendorName As String
+    Dim dblPrice As Double
+    Dim sProduct As String
+    Dim dictVendors As Dictionary
+    
+    'On Error GoTo error_handling
+    
+    Call fInitialization
+     
+    Call fDeleteRowsFromSheetLeaveHeader(shtPurchaseODByVendor)
+    Call fDeleteRowsFromSheetLeaveHeader(shtLog)
+    
+    Call fCopyReadWholeSheetData2Array(shtPurchaseODByProduct, arrMaster, , shtPurchaseODByProduct.DataFromRow)
+     
+'    lMaxRow = ArrLen(arrMaster)
+    If fArrayIsEmptyOrNoData(arrMaster) Then fErr "No data was found in sheet " & shtPurchaseODByProduct.name
+    
+    Set dictLog = New Dictionary
+    
+    Dim iCnt As Long
+    Dim sLines As String
+    Dim arrLines
+    Dim dblQty As Double
+    Dim lLineNumInPrice As Long
+     
+'    ReDim arrOutput(LBound(arrMaster, 1) To UBound(arrMaster, 1), PODByVendor.[_first] To PODByVendor.[_last])
+    
+    Set dictVendors = New Dictionary
+    
+    For lEachRow = LBound(arrMaster, 1) To UBound(arrMaster, 1)
+        sVendorName = Trim(arrMaster(lEachRow, PODByProduct.VendorName))
+        
+        If Not dictVendors.Exists(sVendorName) Then
+            dictVendors.Add sVendorName, lEachRow
+        Else
+            dictVendors(sVendorName) = dictVendors(sVendorName) & DELIMITER & lEachRow
+        End If
+        
+'        arrOutput(lEachRow, PODByVendor.ProdName) = arrMaster(lEachRow, PODByProduct.ProdName)
+'        arrOutput(lEachRow, PODByVendor.Qty) = arrMaster(lEachRow, PODByProduct.Qty)
+'        arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
+'        arrOutput(lEachRow, PODByVendor.Price) = arrMaster(lEachRow, PODByProduct.Price)
+    Next
+     
+'    Call fAppendArray2Sheet(shtPurchaseODByVendor, arrOutput)
+'    Call fSortDataInSheetSortSheetData(shtPurchaseODByVendor, Array(PODByVendor.VendorName, PODByVendor.ProdName))
+'    Call fCopyReadWholeSheetData2Array(shtPurchaseODByVendor, arrMaster, , shtPurchaseODByVendor.DataFromRow)
+'    Call fDeleteRowsFromSheetLeaveHeader(shtPurchaseODByVendor)
+    
+    Dim lCurrRow As Long
+    Dim arrProdutRows
+    Dim rg As Range
+    
+    lCurrRow = PODByProduct.VendorName
+    
+    For i = 0 To dictVendors.Count - 1
+        sVendorName = dictVendors.Keys(i)
+        
+        lCurrRow = lCurrRow + 1
+        
+        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(2, 3)
+        rg.Merge
+        Call fSetBorderLineForRange(rg)
+        
+        With rg.Interior
+'            .Pattern = xlSolid
+'            .PatternColorIndex = xlAutomatic
+'            .ThemeColor = xlThemeColorAccent6
+'            .TintAndShade = 0.399975585192419
+'            .PatternTintAndShade = 0
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            .ThemeColor = xlThemeColorAccent5
+            .TintAndShade = 0.599993896298105
+            .PatternTintAndShade = 0
+        End With
+        rg.Font.Bold = True
+    
+        rg.value = sVendorName
+        lCurrRow = lCurrRow + 2
+        
+        arrProdutRows = Split(dictVendors.Items(j), DELIMITER)
+        
+        ReDim arrOutput(1 To ArrLen(arrProdutRows), 1 To 3)
+        
+        For j = LBound(arrProdutRows) To UBound(arrProdutRows)
+            lEachRow = arrProdutRows(j)
+            
+            arrOutput(j + 1, 1) = arrMaster(lEachRow, PODByProduct.ProdName)
+            arrOutput(j + 1, 2) = arrMaster(lEachRow, PODByProduct.Price)
+            arrOutput(j + 1, 3) = arrMaster(lEachRow, PODByProduct.Qty)
+            'arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
+        Next
+        
+        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(ArrLen(arrProdutRows), 3)
+        
+        Call fSetFormatForOddEvenLineByFixColorForRange(rg)
+        Call fSetBorderLineForRange(rg)
+        
+        rg.value = arrOutput
+        lCurrRow = lCurrRow + ArrLen(arrProdutRows)
+        Erase arrProdutRows
+        Erase arrOutput
+        
+        Set rg = Nothing
+    Next
+'
+'    For lEachRow = LBound(arrMaster, 1) To UBound(arrMaster, 1)
+'        sVendorName = Trim(arrMaster(lEachRow, PODByProduct.VendorName))
+'
+'
+'        arrOutput(lEachRow, PODByVendor.ProdName) = arrMaster(lEachRow, PODByProduct.ProdName)
+'        arrOutput(lEachRow, PODByVendor.Qty) = arrMaster(lEachRow, PODByProduct.Qty)
+'        arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
+'        arrOutput(lEachRow, PODByVendor.Price) = arrMaster(lEachRow, PODByProduct.Price)
+'    Next
+'
+'    Call fSetConditionFormatForBorders(shtPurchaseODByVendor, , shtPurchaseODByVendor.DataFromRow, , 2)
+'    Call fSetConditionFormatForOddEvenLine(shtPurchaseODByVendor, , shtPurchaseODByVendor.DataFromRow)
+    
+    If dictLog.Count > 0 Then
+''        Dim arrLog()
+''        arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
+'        Call fAppendArray2Sheet(shtLog, fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog, "~"))
+'        Call fAppendArray2Sheet(shtLog, fConvertDictionaryDelimiteredItemsTo2DimenArrayForPaste(dictLog, "~"), 3, 2)
+'
+'        Call fSetConditionFormatForBorders(shtLog, , , , 1)
+'        Call fSetConditionFormatForOddEvenLine(shtLog, , , , 1)
+    End If
+error_handling:
+    Erase arrMaster
+    Erase arrOutput
+    Set dictVendors = Nothing
+    
+    If gErrNum <> 0 Then GoTo reset_excel_options
+    If fCheckIfUnCapturedExceptionAbnormalError Then GoTo reset_excel_options
+    
+    Application.ScreenUpdating = True
+    If dictLog.Count > 0 Then
+        'Call fShowAndActiveSheet(shtLog)
+        Call fShowAndActiveSheet(shtPurchaseODByVendor)
+    Else
+        Call fShowAndActiveSheet(shtPurchaseODByVendor)
+    End If
+    
+    sMsg = "处理完成, please check the sheet : " & shtPurchaseODByVendor.name _
+         & IIf(dictLog.Count > 0, vbCr & vbCr & "但是有异常数据,有多个供货商的价格相同的情况发生, 请检查.", "")
+    
+    MsgBox sMsg, IIf(dictLog.Count > 0, vbCritical, vbInformation)
+    Set dictLog = Nothing
+    
+reset_excel_options:
+    Err.Clear
+    fClearGlobalVarialesResetOption
+End Sub
+
+Function fSetFormatForOddEvenLineByFixColorForRange(ByRef rg As Range)
+    Dim lRowTo As Long
+    Dim lStartCol As Long
+    Dim lMaxCol As Long
+    Dim shtOutput As Worksheet
+    
+    Dim rgOddLInes As Range
+    Dim rgEvenLInes As Range
+    Dim lEachRow As Long
+    
+    Set shtOutput = rg.Parent
+    lRowTo = rg.Row + rg.Rows.Count - 1
+    lStartCol = rg.Column
+    lMaxCol = rg.Column + rg.Columns.Count - 1
+    
+    For lEachRow = rg.Row To lRowTo
+        If (lEachRow Mod 2) = 0 Then
+            If rgEvenLInes Is Nothing Then
+                Set rgEvenLInes = fGetRangeByStartEndPos(shtOutput, lEachRow, lStartCol, lEachRow, lMaxCol)
+            Else
+                Set rgEvenLInes = Union(rgEvenLInes, fGetRangeByStartEndPos(shtOutput, lEachRow, lStartCol, lEachRow, lMaxCol))
+            End If
+        Else
+            If rgOddLInes Is Nothing Then
+                Set rgOddLInes = fGetRangeByStartEndPos(shtOutput, lEachRow, lStartCol, lEachRow, lMaxCol)
+            Else
+                Set rgOddLInes = Union(rgOddLInes, fGetRangeByStartEndPos(shtOutput, lEachRow, lStartCol, lEachRow, lMaxCol))
+            End If
+        End If
+    Next
+    
+    Dim sAddr As String
+    If Not rgEvenLInes Is Nothing Then
+        'sAddr = fGetSpecifiedConfigCellAddress(shtSysConf, "[System Misc Settings]", "Value", "Setting Item ID=REPORT_EVEN_LINE_COLOR")
+        sAddr = fGetSysMiscConfig("REPORT_EVEN_LINE_COLOR")
+        rgEvenLInes.Interior.Color = fGetRangeFromExternalAddress(sAddr).Interior.Color
+    End If
+    If Not rgOddLInes Is Nothing Then
+       ' sAddr = fGetSpecifiedConfigCellAddress(shtSysConf, "[System Misc Settings]", "Value", "Setting Item ID=REPORT_ODD_LINE_COLOR")
+        sAddr = fGetSysMiscConfig("REPORT_ODD_LINE_COLOR")
+        rgOddLInes.Interior.Color = fGetRangeFromExternalAddress(sAddr).Interior.Color
+    End If
+    Set rgEvenLInes = Nothing
+    Set rgOddLInes = Nothing
+    Set shtOutput = Nothing
+End Function
+

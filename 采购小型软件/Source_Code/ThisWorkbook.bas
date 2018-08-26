@@ -30,7 +30,11 @@ Sub sub_WorkBookInitialization()
 '    Call fHideSheet(shtPurchaseODByProduct)
 '    Call fHideSheet(shtPurchaseODByVendor)
 '    Call fHideSheet(shtProdMasterExtracted)
-
+    shtPurchaseODRaw.Columns(PODRaw.ProdName).NumberFormat = "@"
+    shtVendorPrice.Columns(VendorPrice.ProdName).NumberFormat = "@"
+    shtPurchaseODByProduct.Columns(PODByProduct.ProdName).NumberFormat = "@"
+    shtPurchaseODByVendor.Columns(PODByVendor.ProdName).NumberFormat = "@"
+    
     Call fClearConditionFormatAndAdd(shtVendorMaster, Vendor.VendorName, True)
     Call fClearConditionFormatAndAdd(shtPurchaseODRaw, PODRaw.ProdName, True)
     Call fClearConditionFormatAndAdd(shtVendorPrice, Array(VendorPrice.ProdName, VendorPrice.VendorName), True)

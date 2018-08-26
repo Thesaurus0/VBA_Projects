@@ -12,7 +12,7 @@ Option Explicit
 Enum PODByVendor
     [_first] = 1
     VendorName = 1
-    ProdName = 1
+    ProdName = 2
     Price = 3
     Qty = 4
     Remarks = 5

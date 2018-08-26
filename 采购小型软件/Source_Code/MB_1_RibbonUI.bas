@@ -181,7 +181,7 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "SCREENTIP":   val = ""
                 
                 Case "ENABLED":     val = True
-                Case "ACTION":      Call subMain_ConsolidateAndGenReports
+                Case "ACTION":      Call subMain_GenPurchaseODByVendor
             End Select
         Case "tbtnShowshtPurchaseODRaw"
             Select Case sType

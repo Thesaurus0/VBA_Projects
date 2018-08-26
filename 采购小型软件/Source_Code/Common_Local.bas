@@ -1472,7 +1472,11 @@ Function fSetConditionFormatForOddEvenLine(ByRef shtParam As Worksheet, Optional
         sKeyColsFormula = ""
     End If
     
-    sFormula = "=And( " & sKeyColsFormula & ", mod(row(),2)=0)"
+    If Len(sKeyColsFormula) > 0 Then
+        sFormula = "=And( " & sKeyColsFormula & ", mod(row(),2)=0)"
+    Else
+        sFormula = "=And( " & sKeyColsFormula & "mod(row(),2)=0)"
+    End If
     
     Set aFormatCondition = rngCondFormat.FormatConditions.Add(Type:=xlExpression, Formula1:=sFormula)
     aFormatCondition.SetFirstPriority
@@ -1766,7 +1770,7 @@ End Function
 Function fClearGlobalVarialesResetOption()
     Set gFSO = Nothing
     Set gRegExp = Nothing
-    
+    Erase arrMaster
     
     fEnableExcelOptionsAll
 End Function
