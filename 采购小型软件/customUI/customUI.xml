@@ -15,6 +15,7 @@
 				</group> 
 				<group id="grpMainFunc" label="主功能">
 					<button id="btnGenReports" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+					<button id="btnGenReportsSecond" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
 				</group>
 				<group id="grpOutputSheets" label="Output">
 					<toggleButton id="tbtnShowshtPurchaseODByProduct" tag="shtPurchaseODByProduct" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
