@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="ERP_UI_Onload">
+	<ribbon startFromScratch="false">
+		<tabs>
+			<tab id="ERP_2010" label="采购订单工具">
+				<group id="grpClearData" label="清空">
+					<button id="btnClearData" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+					<separator id="spInputSheets01"/>
+					<toggleButton id="tbtnShowshtPurchaseODRaw" tag="shtPurchaseODRaw" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+				</group>
+				<group id="grpInputSheets" label="主表">
+					<toggleButton id="tbtnShowshtVendorPrice" tag="shtVendorPrice" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+					<separator id="spInputSheets02"/>
+					<toggleButton id="tbtnShowshtVendorMaster" tag="shtVendorMaster" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+				</group> 
+				<group id="grpMainFunc" label="主功能">
+					<button id="btnGenReports" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+				</group>
+				<group id="grpOutputSheets" label="Output">
+					<toggleButton id="tbtnShowshtPurchaseODByProduct" tag="shtPurchaseODByProduct" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+					<separator id="spOutputSheets01"/>
+					<toggleButton id="tbtnShowshtPurchaseODByVendor" tag="shtPurchaseODByVendor" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+					<separator id="spOutputSheets02"/>
+					<toggleButton id="tbtnShowshtLog" tag="shtLog" getLabel="Button_getLabel" getSize="Button_getSize" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+				</group> 
+				<group id="grpOthers" label="其他">
+					<button id="btnOpenFileFolder" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" getScreentip="Button_getScreentip"  getSupertip="Button_getSupertip"/>
+				</group> 
+			</tab>
+		</tabs>
+	</ribbon>
+</customUI>

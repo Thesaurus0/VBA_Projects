@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="ERP_UI_Onload"> 
+	<ribbon startFromScratch="false">
+		<tabs>
+			<tab id="ERP_2010" label="硕嘉木业">
+				<group id="grpSummary" label="统计汇总">
+					<button id="btnGenReports" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+				</group> 
+				<group id="grpInputSheets" label="数据报表">
+					<toggleButton id="tbtnShowshtRawData" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtRawData" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+					<separator id="spSummAmount01"/> 
+					<toggleButton id="tbtnShowshtCabinet" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtCabinet" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+					<separator id="spSummAmount02"/> 
+					<toggleButton id="tbtnShowshtDoor" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtDoor" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+					<separator id="spSummAmount03"/> 
+					<toggleButton id="tbtnShowshtCabinetFrame" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtCabinetFrame" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+					<separator id="spSummAmount04"/> 
+					<toggleButton id="tbtnShowshtHardwares" getLabel="Button_getLabel" getSize="Button_getSize" tag="shtHardwares" getImage="Button_getImage"  onAction="ToggleButtonToSwitchSheet_onAction" getPressed="ToggleButtonToSwitchSheet_getPressed"/>
+				</group>  
+				<group id="grpPrint" label="打印">
+					<button id="btnPrint" getLabel="Button_getLabel" getImage="Button_getImage" getSize="Button_getSize" onAction="Button_onAction" />
+				</group> 
+			</tab> 
+		</tabs>
+	</ribbon>
+</customUI>

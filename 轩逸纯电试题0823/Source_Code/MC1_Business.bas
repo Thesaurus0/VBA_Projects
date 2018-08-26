@@ -19,7 +19,7 @@ Sub subMain_ConsolidateAndGenReports()
     Dim sMsg As String
     Dim dblTmp As Double
     
-   ' On Error GoTo error_handling
+    On Error GoTo error_handling
     
     Call fInitialization
     
@@ -46,6 +46,7 @@ Sub subMain_ConsolidateAndGenReports()
         
         sAnswerOptions = Replace(sAnswerOptions, "ح", "|")
         sAnswerOptions = Replace(sAnswerOptions, " ", "")
+        sAnswerOptions = Replace(sAnswerOptions, vbLf, "")
         arrAOptions = Split(sAnswerOptions, "|")
                 
         If UBound(arrAOptions) >= 0 Then arrOutput(lEachRow, Rpt.AOptionA) = "A. " & arrAOptions(0)
@@ -61,6 +62,7 @@ Sub subMain_ConsolidateAndGenReports()
         
         sAnswer = Replace(sAnswer, "ح", "|")
         sAnswer = Replace(sAnswer, " ", "")
+        sAnswer = Replace(sAnswer, vbLf, "")
         arrAnswer = Split(sAnswer, "|")
         
         For i = LBound(arrAnswer) To UBound(arrAnswer)
