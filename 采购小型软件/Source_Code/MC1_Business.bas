@@ -481,7 +481,7 @@ Sub subMain_GenPurchaseODByVendor()
     Dim sProduct As String
     Dim dictVendors As Dictionary
     
-   ' On Error GoTo error_handling
+    On Error GoTo error_handling
     
     Call fInitialization
      
@@ -557,7 +557,7 @@ Sub subMain_GenPurchaseODByVendor()
         rg.value = sVendorName
         lCurrRow = lCurrRow + 2
         
-        arrProdutRows = Split(dictVendors.Items(j), DELIMITER)
+        arrProdutRows = Split(dictVendors.Items(i), DELIMITER)
         
         ReDim arrOutput(1 To ArrLen(arrProdutRows), 1 To 4)
         
