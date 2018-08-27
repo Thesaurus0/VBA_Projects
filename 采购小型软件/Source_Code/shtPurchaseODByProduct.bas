@@ -16,7 +16,8 @@ Enum PODByProduct
     Price = 3
     Qty = 4
     Remarks = 5
-    [_last] = Remarks
+    Customer = 6
+    [_last] = Customer
 End Enum
 
 Public Property Get HeaderByRow()

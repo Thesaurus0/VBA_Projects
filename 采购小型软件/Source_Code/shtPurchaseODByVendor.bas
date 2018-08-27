@@ -16,6 +16,7 @@ Enum PODByVendor
     Price = 3
     Qty = 4
     Remarks = 5
+    Customer = 6
     [_last] = Remarks
 End Enum
 

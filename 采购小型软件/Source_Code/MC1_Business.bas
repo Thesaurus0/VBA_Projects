@@ -62,6 +62,7 @@ Sub subMain_ConsolidateAndGenReports()
         
         arrOutput(iCnt, PODByProduct.ProdName) = sProduct
         arrOutput(iCnt, PODByProduct.Qty) = dblQty
+        arrOutput(iCnt, PODByProduct.Customer) = Trim(arrRawData(lEachRow, PODRaw.Customer))
         
         If Not dictMultiPrice.Exists(sProduct) Then
             If dictUniquePrice.Exists(sProduct) Then
@@ -82,6 +83,7 @@ Sub subMain_ConsolidateAndGenReports()
                 
                 arrOutput(iCnt, PODByProduct.ProdName) = sProduct
                 arrOutput(iCnt, PODByProduct.Qty) = dblQty
+                arrOutput(iCnt, PODByProduct.Customer) = Trim(arrRawData(lEachRow, PODRaw.Customer))
                 
                 lLineNumInPrice = CLng(arrLines(i))
                 
@@ -133,8 +135,6 @@ reset_excel_options:
     fClearGlobalVarialesResetOption
 End Sub
 
-
-
 Function fReadVendorPrice(arrVendorPrices(), dictUniquePrice As Dictionary, dictMultiPrice As Dictionary)
     Dim lEachRow As Long
     Dim sProd As String
@@ -146,7 +146,6 @@ Function fReadVendorPrice(arrVendorPrices(), dictUniquePrice As Dictionary, dict
     
     Dim dictFirstPrice As Dictionary
     Dim dictAll As Dictionary
-    
     
     Set dictFirstPrice = New Dictionary
     
@@ -482,7 +481,7 @@ Sub subMain_GenPurchaseODByVendor()
     Dim sProduct As String
     Dim dictVendors As Dictionary
     
-    'On Error GoTo error_handling
+   ' On Error GoTo error_handling
     
     Call fInitialization
      
@@ -537,7 +536,7 @@ Sub subMain_GenPurchaseODByVendor()
         
         lCurrRow = lCurrRow + 1
         
-        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(2, 3)
+        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(2, 4)
         rg.Merge
         Call fSetBorderLineForRange(rg)
         
@@ -560,7 +559,7 @@ Sub subMain_GenPurchaseODByVendor()
         
         arrProdutRows = Split(dictVendors.Items(j), DELIMITER)
         
-        ReDim arrOutput(1 To ArrLen(arrProdutRows), 1 To 3)
+        ReDim arrOutput(1 To ArrLen(arrProdutRows), 1 To 4)
         
         For j = LBound(arrProdutRows) To UBound(arrProdutRows)
             lEachRow = arrProdutRows(j)
@@ -568,10 +567,11 @@ Sub subMain_GenPurchaseODByVendor()
             arrOutput(j + 1, 1) = arrMaster(lEachRow, PODByProduct.ProdName)
             arrOutput(j + 1, 2) = arrMaster(lEachRow, PODByProduct.Price)
             arrOutput(j + 1, 3) = arrMaster(lEachRow, PODByProduct.Qty)
+            arrOutput(j + 1, 4) = arrMaster(lEachRow, PODByProduct.Customer)
             'arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
         Next
         
-        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(ArrLen(arrProdutRows), 3)
+        Set rg = shtPurchaseODByVendor.Cells(lCurrRow, 2).Resize(ArrLen(arrProdutRows), 4)
         
         Call fSetFormatForOddEvenLineByFixColorForRange(rg)
         Call fSetBorderLineForRange(rg)

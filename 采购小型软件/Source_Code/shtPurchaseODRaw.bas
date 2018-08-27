@@ -12,6 +12,7 @@ Option Explicit
 Enum PODRaw
     ProdName = 1
     PurchaseQty = 2
+    Customer = 3
 End Enum
 
 Public Property Get HeaderByRow()
