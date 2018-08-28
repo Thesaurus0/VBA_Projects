@@ -513,11 +513,6 @@ Sub subMain_GenPurchaseODByVendor()
         Else
             dictVendors(sVendorName) = dictVendors(sVendorName) & DELIMITER & lEachRow
         End If
-        
-'        arrOutput(lEachRow, PODByVendor.ProdName) = arrMaster(lEachRow, PODByProduct.ProdName)
-'        arrOutput(lEachRow, PODByVendor.Qty) = arrMaster(lEachRow, PODByProduct.Qty)
-'        arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
-'        arrOutput(lEachRow, PODByVendor.Price) = arrMaster(lEachRow, PODByProduct.Price)
     Next
      
 '    Call fAppendArray2Sheet(shtPurchaseODByVendor, arrOutput)
@@ -564,10 +559,10 @@ Sub subMain_GenPurchaseODByVendor()
         For j = LBound(arrProdutRows) To UBound(arrProdutRows)
             lEachRow = arrProdutRows(j)
             
-            arrOutput(j + 1, 1) = arrMaster(lEachRow, PODByProduct.ProdName)
-            arrOutput(j + 1, 2) = arrMaster(lEachRow, PODByProduct.Price)
-            arrOutput(j + 1, 3) = arrMaster(lEachRow, PODByProduct.Qty)
-            arrOutput(j + 1, 4) = arrMaster(lEachRow, PODByProduct.Customer)
+            arrOutput(j + 1, PODByVendor.ProdName - 1) = arrMaster(lEachRow, PODByProduct.ProdName)
+            arrOutput(j + 1, PODByVendor.Qty - 1) = arrMaster(lEachRow, PODByProduct.Qty)
+            arrOutput(j + 1, PODByVendor.Customer - 1) = arrMaster(lEachRow, PODByProduct.Customer)
+            arrOutput(j + 1, PODByVendor.Price - 1) = arrMaster(lEachRow, PODByProduct.Price)
             'arrOutput(lEachRow, PODByVendor.VendorName) = arrMaster(lEachRow, PODByProduct.VendorName)
         Next
         

@@ -13,11 +13,11 @@ Enum PODByVendor
     [_first] = 1
     VendorName = 1
     ProdName = 2
-    Price = 3
-    Qty = 4
-    Remarks = 5
-    Customer = 6
-    [_last] = Remarks
+    Qty = 3
+    Customer = 4
+    Price = 5
+    Remarks = 6
+    [_last] = 6
 End Enum
 
 Public Property Get HeaderByRow()
