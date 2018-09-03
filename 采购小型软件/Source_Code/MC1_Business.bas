@@ -177,13 +177,13 @@ next_row:
         dblFirstPrice = dictFirstPrice(sProd)
         
         If Not dictAll.Exists(sProd) Then
-            If dblPrice < dblFirstPrice Then fErr "this price on line " & lEachRow + 1 & " should not be larger than the first one " & dblFirstPrice
+            'If dblPrice < dblFirstPrice Then fErr "this price on line " & lEachRow + 1 & " should not be smaller than the first one: " & dblFirstPrice & vbCr & dblPrice
             
             If dblPrice = dblFirstPrice Then
                 dictAll.Add sProd, lEachRow
             End If
         Else
-            If dblPrice < dblFirstPrice Then fErr "this price on line " & lEachRow + 1 & " should not be larger than the first one " & dblFirstPrice
+           ' If dblPrice < dblFirstPrice Then fErr "this price on line " & lEachRow + 1 & " should not be smaller than the first one " & dblFirstPrice
             
             If dblPrice = dblFirstPrice Then
                 dictAll(sProd) = dictAll(sProd) & DELIMITER & lEachRow
@@ -462,6 +462,9 @@ Function fExtractProductFromPriceConfigSheet()
     Dim arrData()
     arrData = fTranspose1DimenArrayTo2DimenArrayVertically(dictProd.Keys)
     
+    
+    shtProdMasterExtracted.Columns("A").ClearContents
+    shtProdMasterExtracted.Columns("A").NumberFormat = "@"
     shtProdMasterExtracted.Range("A1").Resize(ArrLen(arrData), 1).value = arrData
     
     Erase arrData
