@@ -627,7 +627,7 @@ Function fRecalculateColumnIndexByRemoveNonImportTxtCol(ByRef dictLetterIndex As
     
     If fArrayIsEmptyOrNoData(arrTxtNonImportCol) Then GoTo exit_fun
     
-    Call fSortArayDesc(arrTxtNonImportCol)
+    Call fSortArrayDesc(arrTxtNonImportCol)
     
     Dim iArrayIndex As Long
     Dim iDictIndex As Long
@@ -1542,6 +1542,7 @@ Function fSetConditionFormatForBorders(ByRef shtParam As Worksheet, Optional lMa
         sKeyColsFormula = ""
     End If
     
+    If Len(Trim(sKeyColsFormula)) > 0 Then _
     sFormula = "=And( " & sKeyColsFormula & ")"
     
     Set aFormatCondition = rngCondFormat.FormatConditions.Add(Type:=xlExpression, Formula1:=sFormula)

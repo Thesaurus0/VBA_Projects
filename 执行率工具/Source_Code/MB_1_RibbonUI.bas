@@ -170,19 +170,19 @@ Function fGetControlAttributes(control As IRibbonControl, sType As String, Optio
                 Case "ENABLED":     val = True
                 Case "ACTION":      Call subMain_ConsolidateAndGenReports
             End Select
-'        Case "btnGenReportsSecond"
-'            Select Case sType
-'                Case "LABEL":   val = "基于检查后的采购订单" & vbCr & "生成供应商供货清单"
-'                Case "IMAGE":   val = "OpenStartPage"
-'                Case "SIZE":        val = "true"    'large=true, normal=false
-'                Case "SHOW_IMAGE":  val = "true"
-'                Case "SCREENTIP":    val = ""
-'                Case "SUPERTIP":    val = ""
-'                Case "SCREENTIP":   val = ""
-'
-'                Case "ENABLED":     val = True
-'                Case "ACTION":      Call subMain_GenPurchaseODByVendor
-'            End Select
+        Case "btnGenReport_Summary"
+            Select Case sType
+                Case "LABEL":   val = "生成汇总报表"
+                Case "IMAGE":   val = "OpenStartPage"
+                Case "SIZE":        val = "true"    'large=true, normal=false
+                Case "SHOW_IMAGE":  val = "true"
+                Case "SCREENTIP":    val = ""
+                Case "SUPERTIP":    val = ""
+                Case "SCREENTIP":   val = ""
+
+                Case "ENABLED":     val = True
+                Case "ACTION":      Call subMain_GenSummaryReport
+            End Select
 '        Case "tbtnShowshtPurchaseODRaw"
 '            Select Case sType
 '                Case "LABEL":   val = "输入采购数量" '& vbCr & shtPurchaseODRaw.name

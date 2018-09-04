@@ -35,22 +35,20 @@ Sub subMain_ConsolidateAndGenReports()
     
     arrHeader = Array(chapter, criteria_item, FEASIBLE_TO_PROCESS, PROCESS_ON_THE_WAY, REASON_WHY_NOT, YOUR_ACTION)
     
-    'On Error GoTo error_handling
-    Call fDeleteRowsFromSheetLeaveHeader(shtLog)
-    Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
-    Call fDeleteRowsFromSheetLeaveHeader(shtReportSummary)
-    
+    On Error GoTo error_handling
     
     Set dictLog = New Dictionary
     
-'    sFolder = fSelectFolderDialog(ThisWorkbook.Path)
-'
-'    If Len(sFolder) <= 0 Then fErr
-'
+'    sFolder = fSelectFolderDialog(ThisWorkbook.Path)'
+'    If Len(sFolder) <= 0 Then fErr'
 '    arrFiles = fGetFilesFromFolder(sFolder)
     arrFiles = fSelectMultipleFileDialog(ThisWorkbook.Path, "Excel File=*.xlsx;*.xls", "Please select files")
     
     If ArrLen(arrFiles) <= 0 Then fErr
+    
+    Call fDeleteRowsFromSheetLeaveHeader(shtLog)
+    Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
+    Call fDeleteRowsFromSheetLeaveHeader(shtAllItems)
     
     Dim sFile As String
     Dim wb As Workbook
@@ -65,6 +63,7 @@ Sub subMain_ConsolidateAndGenReports()
     Dim j As Long
     Dim sNotInProc As String
     Dim sNotInProcReason As String
+    Dim dictAllItems As Dictionary
     
     For i = LBound(arrFiles) To UBound(arrFiles)
         sFile = arrFiles(i)
@@ -92,7 +91,7 @@ Sub subMain_ConsolidateAndGenReports()
         Call fFillArrayByMergedCells(arrMaster, colIndex.Reason, shtInput, lHeaderAtRow + 1)
         Call fFillArrayByMergedCells(arrMaster, colIndex.Action, shtInput, lHeaderAtRow + 1)
         dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
-        , dictLog, dictNotInProcess, dblInprocessRate)
+        , dictLog, dictNotInProcess, dblInprocessRate, dictAllItems)
         
         If Not bAlreadyOpened Then Call fCloseWorkBookWithoutSave(wb)
         
@@ -114,7 +113,6 @@ Sub subMain_ConsolidateAndGenReports()
                 arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
                 arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
             Next
-        
         Else
             ReDim arrOutput(1 To 1, 1 To 8)
             Erase arrMaster
@@ -125,12 +123,16 @@ Sub subMain_ConsolidateAndGenReports()
         End If
         
         Call fAppendArray2Sheet(shtReportDetails, arrOutput)
+        Call fAppendArray2Sheet(shtAllItems, fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictAllItems))
 next_file:
+        Set dictAllItems = Nothing
     Next
 
 '    Call fAppendArray2Sheet(shtPurchaseODByProduct, arrOutput)
     Call fSetConditionFormatForBorders(shtReportDetails, , 2, , 1)
     Call fSetConditionFormatForOddEvenLine(shtReportDetails, , 2, , 1)
+    Call fSetConditionFormatForBorders(shtAllItems, , , , 1)
+    Call fSetConditionFormatForOddEvenLine(shtAllItems, , , , 1)
 '
     If dictLog.Count > 0 Then
         Dim arrLog()
@@ -174,7 +176,7 @@ End Sub
 
 Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef arrMaster, sht As Worksheet _
                 , lStartRow As Long, colIndex As typeCols, ByRef dictLog As Dictionary _
-                , ByRef dictNotInProcess As Dictionary, ByRef dblInprocessRate As Double) As Double
+                , ByRef dictNotInProcess As Dictionary, ByRef dblInprocessRate As Double, ByRef dictAllItems As Dictionary) As Double
     Dim lEachRow As Long
     Dim lMaxRow As Long
     Dim rgMerged As Range
@@ -201,6 +203,7 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
     
     Set dictInProcessItem = New Dictionary
     Set dictNotInProcess = New Dictionary
+    Set dictAllItems = New Dictionary
     
 '    aValue = ""
     lTotalItemCnt = 0
@@ -264,6 +267,8 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
                     End If
                    ' End If
                 End If
+                
+                dictAllItems(sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & sFeasible & DELIMITER & sInProcess & DELIMITER & sReason & DELIMITER & sAction) = ""
 next_sub_row:
             Next
             
@@ -437,3 +442,198 @@ Function fExtractProductFromPriceConfigSheet()
     Set dictProd = Nothing
 End Function
  
+Sub subMain_GenSummaryReport()
+    Dim arrOutput()
+    Dim dictLog As Dictionary
+    Dim lEachRow As Long
+    Dim i As Integer
+    Dim sMsg As String
+    Dim sFolder As String
+    Dim dblPrice As Double
+    Dim sProduct As String
+    Dim dictNotInProcess As Dictionary
+    
+    Call fInitialization
+
+    'On Error GoTo error_handling
+    fGetRangeByStartEndPos(shtReportSummary, 2, 1, 3, 10).ClearContents
+    
+    Set dictLog = New Dictionary
+    
+    Call fCopyReadWholeSheetData2Array(shtAllItems, arrMaster)
+     
+    Dim sFile As String
+    Dim wb As Workbook
+    Dim sFeasible  As String
+    Dim j As Long
+    Dim dictUniqueFiles As Dictionary
+    Dim dictAnyNotFeasible As Dictionary
+    Dim dictChapterCnt As Dictionary
+    Dim dictItemCnt As Dictionary
+    
+    Dim lFeasibleCnt As Long
+    Dim lInProcCnt As Long
+    Dim sInProcess As String
+    Dim sItem As String
+    Dim sChapter As String
+    
+    Set dictUniqueFiles = New Dictionary
+    Set dictAnyNotFeasible = New Dictionary
+    Set dictChapterCnt = New Dictionary
+    Set dictItemCnt = New Dictionary
+    lFeasibleCnt = 0
+    lInProcCnt = 0
+    For i = LBound(arrMaster, 1) To UBound(arrMaster, 1)
+        sFile = Trim(arrMaster(i, 1))
+        sChapter = Trim(arrMaster(i, 2))
+        sItem = Trim(arrMaster(i, 3))
+        sFeasible = Trim(arrMaster(i, 4))
+        sInProcess = Trim(arrMaster(i, 5))
+        
+        If Not dictUniqueFiles.Exists(sFile) Then
+            dictUniqueFiles.Add sFile, ""
+        End If
+        
+        If sFeasible = "是" Then
+            lFeasibleCnt = lFeasibleCnt + 1
+        Else
+            dictAnyNotFeasible(sFile) = ""
+        End If
+        
+        If sInProcess = "是" Then
+            lInProcCnt = lInProcCnt + 1
+        Else
+            dictChapterCnt(sChapter) = val(dictChapterCnt(sChapter)) + 1
+            dictItemCnt(sItem) = val(dictItemCnt(sItem)) + 1
+        End If
+    Next
+    
+    Dim dictAllFeasible As Dictionary
+    Set dictAllFeasible = New Dictionary
+    For i = 0 To dictUniqueFiles.Count - 1
+        sFile = dictUniqueFiles.Keys(i)
+        If Not dictAnyNotFeasible.Exists(sFile) Then
+            dictAllFeasible.Add sFile, ""
+        End If
+    Next
+    
+    shtReportSummary.Range("A2").value = dictUniqueFiles.Count
+    shtReportSummary.Range("B2").value = lFeasibleCnt / ArrLen(arrMaster, 1)
+    shtReportSummary.Range("C2").value = lInProcCnt / ArrLen(arrMaster, 1)
+    shtReportSummary.Range("D2").value = dictAllFeasible.Count
+    shtReportSummary.Range("E2").value = dictUniqueFiles.Count - dictAllFeasible.Count
+    
+    Set dictUniqueFiles = Nothing
+    Set dictAllFeasible = Nothing
+    
+    '====================================
+    Dim arrChapter()
+    
+    Dim dictUniqueChapterCnt As Dictionary
+    Set dictUniqueChapterCnt = New Dictionary
+    For i = 0 To dictChapterCnt.Count - 1
+        dictUniqueChapterCnt(dictChapterCnt.Items(i)) = ""
+    Next
+    
+    arrChapter = dictUniqueChapterCnt.Keys()
+    Set dictUniqueChapterCnt = Nothing
+    
+    Call fSortArrayDesc(arrChapter)
+    
+    If ArrLen(arrChapter) > 11 Then
+        ReDim Preserve arrChapter(0 To 10)
+    End If
+
+    Dim dictWorst As Dictionary
+    Set dictWorst = New Dictionary
+        
+    For j = LBound(arrChapter) To UBound(arrChapter)
+        For i = 0 To dictChapterCnt.Count - 1
+            If dictChapterCnt.Items(i) = arrChapter(j) Then
+                dictWorst(dictChapterCnt.Keys(i)) = dictChapterCnt.Items(i)
+            End If
+        Next
+    Next
+    Erase arrChapter
+    Set dictChapterCnt = Nothing
+    
+    Dim sWorst As String
+    For i = 0 To dictWorst.Count - 1
+        sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "条"
+    Next
+
+    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
+    shtReportSummary.Range("F2").value = sWorst
+    Set dictUniqueChapterCnt = Nothing
+    Set dictWorst = Nothing
+'===============
+    Dim arrItem()
+    
+    Dim dictUniqueItemCnt As Dictionary
+    Set dictUniqueItemCnt = New Dictionary
+    For i = 0 To dictItemCnt.Count - 1
+        dictUniqueItemCnt(dictItemCnt.Items(i)) = ""
+    Next
+    
+    arrItem = dictUniqueItemCnt.Keys()
+    Set dictUniqueItemCnt = Nothing
+    
+    Call fSortArrayDesc(arrItem)
+    
+    If ArrLen(arrItem) > 20 Then
+        ReDim Preserve arrItem(0 To 19)
+    End If
+
+    Set dictWorst = New Dictionary
+        
+    For j = LBound(arrItem) To UBound(arrItem)
+        For i = 0 To dictItemCnt.Count - 1
+            If dictItemCnt.Items(i) = arrItem(j) Then
+                dictWorst(dictItemCnt.Keys(i)) = dictItemCnt.Items(i)
+            End If
+        Next
+    Next
+    Erase arrItem
+    Set dictItemCnt = Nothing
+    
+    sWorst = ""
+    For i = 0 To dictWorst.Count - 1
+        sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "条"
+    Next
+
+    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
+    shtReportSummary.Range("G2").value = sWorst
+    Set dictUniqueItemCnt = Nothing
+    Set dictWorst = Nothing
+    
+'    If dictLog.Count > 0 Then
+'        Dim arrLog()
+'        arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
+'        Call fAppendArray2Sheet(shtLog, arrLog)
+'
+'
+'        Call fSetConditionFormatForBorders(shtLog, , , , 1)
+'        Call fSetConditionFormatForOddEvenLine(shtLog, , , , 1)
+'    End If
+error_handling:
+    Set dictUniqueFiles = Nothing
+    Set dictNotInProcess = Nothing
+    
+'    Erase arrVendorPrices
+    Erase arrOutput
+    
+    If gErrNum <> 0 Then GoTo reset_excel_options
+    If fCheckIfUnCapturedExceptionAbnormalError Then GoTo reset_excel_options
+    
+    Application.ScreenUpdating = True
+    Call fShowAndActiveSheet(shtReportSummary)
+    
+    sMsg = "处理完成, please check the sheet : " & shtReportSummary.name
+    
+    MsgBox sMsg, IIf(dictLog.Count > 0, vbCritical, vbInformation)
+    Set dictLog = Nothing
+    
+reset_excel_options:
+    Err.Clear
+    fClearGlobalVarialesResetOption
+End Sub
