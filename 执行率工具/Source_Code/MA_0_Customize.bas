@@ -68,9 +68,9 @@ Function fInitialization()
     gErrMsg = ""
     
     Call fDisableExcelOptionsAll
-    
-    Application.ScreenUpdating = True
-    Application.ScreenUpdating = True   ' for testing
+'
+'    Application.ScreenUpdating = True
+'    Application.ScreenUpdating = True   ' for testing
     
     Call fRemoveFilterForAllSheets
 End Function

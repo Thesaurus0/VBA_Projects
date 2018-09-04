@@ -31,22 +31,24 @@ Sub subMain_ConsolidateAndGenReports()
     Dim arrHeader()
     Dim dictNotInProcess As Dictionary
     
+    Call fInitialization
+    
     arrHeader = Array(chapter, criteria_item, FEASIBLE_TO_PROCESS, PROCESS_ON_THE_WAY, REASON_WHY_NOT, YOUR_ACTION)
     
-    On Error GoTo error_handling
+    'On Error GoTo error_handling
     Call fDeleteRowsFromSheetLeaveHeader(shtLog)
     Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
     Call fDeleteRowsFromSheetLeaveHeader(shtReportSummary)
     
-    Call fInitialization
     
     Set dictLog = New Dictionary
     
-    sFolder = fSelectFolderDialog(ThisWorkbook.Path)
-    
-    If Len(sFolder) <= 0 Then fErr
-    
-    arrFiles = fGetFilesFromFolder(sFolder)
+'    sFolder = fSelectFolderDialog(ThisWorkbook.Path)
+'
+'    If Len(sFolder) <= 0 Then fErr
+'
+'    arrFiles = fGetFilesFromFolder(sFolder)
+    arrFiles = fSelectMultipleFileDialog(ThisWorkbook.Path, "Excel File=*.xlsx;*.xls", "Please select files")
     
     If ArrLen(arrFiles) <= 0 Then fErr
     
@@ -73,9 +75,9 @@ Sub subMain_ConsolidateAndGenReports()
         
         Set dictNotInProcess = New Dictionary
         
-        Set wb = fOpenWorkbook(sFile, bAlreadyOpened, True, , shtInput)
+        Set wb = fOpenWorkbook(sFile, bAlreadyOpened, False, , shtInput)
         
-        Call fFindAllColumnsIndexByColNames(shtInput.Cells, arrHeader, arrColIndex, lHeaderAtRow)
+        Call fFindAllColumnsIndexByColNames(shtInput.Rows("1:10"), arrHeader, arrColIndex, lHeaderAtRow)
         
         colIndex.chapter = arrColIndex(LBound(arrColIndex))
         colIndex.CriteriaItem = arrColIndex(LBound(arrColIndex) + 1)
@@ -87,30 +89,40 @@ Sub subMain_ConsolidateAndGenReports()
         If shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeCells Then lHeaderAtRow = shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Row + shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Rows.Count - 1
         arrMaster = fGetRangeByStartEndPos(shtInput, 1, 1, fGetValidMaxRow(shtInput), fGetValidMaxCol(shtInput)).value
         
-        dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
-        , dictLog, dictNotInProcess, dblInprocessRate)
         Call fFillArrayByMergedCells(arrMaster, colIndex.Reason, shtInput, lHeaderAtRow + 1)
         Call fFillArrayByMergedCells(arrMaster, colIndex.Action, shtInput, lHeaderAtRow + 1)
+        dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
+        , dictLog, dictNotInProcess, dblInprocessRate)
         
         If Not bAlreadyOpened Then Call fCloseWorkBookWithoutSave(wb)
         
-        ReDim arrOutput(1 To dictNotInProcess.Count, 1 To 8)
-        'Set dictNotInProcess = fConsolidateAndCalculate(arrMaster, colIndex)
-        Erase arrMaster
+        If dictNotInProcess.Count > 0 Then
+            ReDim arrOutput(1 To dictNotInProcess.Count, 1 To 8)
+            'Set dictNotInProcess = fConsolidateAndCalculate(arrMaster, colIndex)
+            Erase arrMaster
+            
+            For j = 0 To dictNotInProcess.Count - 1
+                arrOutput(j + 1, 1) = sFileNetName
+                arrOutput(j + 1, 2) = dblFeasibleRate
+                arrOutput(j + 1, 3) = dblInprocessRate
+                
+                sNotInProc = dictNotInProcess.Keys(j)
+                sNotInProcReason = dictNotInProcess.Items(j)
+                arrOutput(j + 1, 4) = Split(sNotInProc, DELIMITER)(0)
+                arrOutput(j + 1, 5) = Split(sNotInProc, DELIMITER)(1)
+                
+                arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
+                arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
+            Next
         
-        For j = 0 To dictNotInProcess.Count - 1
-            arrOutput(j + 1, 1) = sFileNetName
-            arrOutput(j + 1, 2) = dblFeasibleRate
-            arrOutput(j + 1, 3) = dblInprocessRate
+        Else
+            ReDim arrOutput(1 To 1, 1 To 8)
+            Erase arrMaster
             
-            sNotInProc = dictNotInProcess.Keys(j)
-            sNotInProcReason = dictNotInProcess.Items(j)
-            arrOutput(j + 1, 4) = Split(sNotInProc, DELIMITER)(0)
-            arrOutput(j + 1, 5) = Split(sNotInProc, DELIMITER)(1)
-            
-            arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
-            arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
-        Next
+            arrOutput(1, 1) = sFileNetName
+            arrOutput(1, 2) = dblFeasibleRate
+            arrOutput(1, 3) = 1
+        End If
         
         Call fAppendArray2Sheet(shtReportDetails, arrOutput)
 next_file:
@@ -125,9 +137,9 @@ next_file:
         arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
         Call fAppendArray2Sheet(shtLog, arrLog)
         
-        arrLog = fConvertDictionaryDelimiteredItemsTo2DimenArrayForPaste(dictLog)
-        'Call fAppendArray2Sheet(shtLog, fConvertDictionaryDelimiteredItemsTo2DimenArrayForPaste(dictLog, "~"), 3, 2)
-        shtLog.Cells(2, 5).Resize(ArrLen(arrLog, 1), ArrLen(arrLog, 2)).value = arrLog
+'        arrLog = fConvertDictionaryDelimiteredItemsTo2DimenArrayForPaste(dictLog)
+'        'Call fAppendArray2Sheet(shtLog, fConvertDictionaryDelimiteredItemsTo2DimenArrayForPaste(dictLog, "~"), 3, 2)
+'        shtLog.Cells(2, 5).Resize(ArrLen(arrLog, 1), ArrLen(arrLog, 2)).value = arrLog
 
         Call fSetConditionFormatForBorders(shtLog, , , , 1)
         Call fSetConditionFormatForOddEvenLine(shtLog, , , , 1)
@@ -204,6 +216,8 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
             lTotalItemCnt = lTotalItemCnt + rgMerged.Rows.Count
                         
             sChapter = Trim(arrMaster(lMergeStartRow, colIndex.chapter))
+            
+            If sChapter = "章节" Then GoTo next_row
                 
             For i = lEachRow To lEndRow
                 sItem = Trim(arrMaster(i, colIndex.CriteriaItem))
@@ -215,7 +229,7 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
                 arrMaster(i, colIndex.chapter) = sChapter
                 
                 If Len(sFeasible) <= 0 Then
-                    dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为空", i
+                    dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为空" & DELIMITER & i, ""
                     GoTo next_sub_row
                 End If
                 If Len(sInProcess) <= 0 Then
@@ -225,7 +239,7 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
                 
                 If sFeasible = YES Then
                     If dictFeasibleItem.Exists(sChapter & DELIMITER & sItem) Then
-                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "相同的执行要点,在同一个章节中出现了两次", i
+                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "相同的执行要点,在同一个章节中出现了两次" & DELIMITER & i, ""
                     Else
                         dictFeasibleItem.Add sChapter & DELIMITER & sItem, ""
                     End If
@@ -241,12 +255,14 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
                             dictInProcessItem.Add sChapter & DELIMITER & sItem, ""
                         End If
                     Else
-                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为[否],但是[是否在执行]却是[是], 前否不一致.", i
+                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为[否],但是[是否在执行]却是[是], 前否不一致." & DELIMITER & i, ""
                     End If
                 Else
-                    If sFeasible = YES Then
+                   ' If sFeasible = YES Then
+                   If sChapter <> "章节" Then
                         dictNotInProcess.Add sChapter & DELIMITER & sItem, sReason & DELIMITER & sAction
                     End If
+                   ' End If
                 End If
 next_sub_row:
             Next
