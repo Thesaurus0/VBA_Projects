@@ -446,7 +446,7 @@ Sub subMain_GenSummaryReport()
     Dim arrOutput()
     Dim dictLog As Dictionary
     Dim lEachRow As Long
-    Dim i As Integer
+    Dim i As Long
     Dim sMsg As String
     Dim sFolder As String
     Dim dblPrice As Double
@@ -455,8 +455,8 @@ Sub subMain_GenSummaryReport()
     
     Call fInitialization
 
-    'On Error GoTo error_handling
-    fGetRangeByStartEndPos(shtReportSummary, 2, 1, 3, 10).ClearContents
+    On Error GoTo error_handling
+    fGetRangeByStartEndPos(shtReportSummary, 2, 1, 2 + fGetValidMaxRow(shtReportSummary), 10).ClearContents
     
     Set dictLog = New Dictionary
     
@@ -470,6 +470,7 @@ Sub subMain_GenSummaryReport()
     Dim dictAnyNotFeasible As Dictionary
     Dim dictChapterCnt As Dictionary
     Dim dictItemCnt As Dictionary
+    Dim dictItem2Chapter As Dictionary
     
     Dim lFeasibleCnt As Long
     Dim lInProcCnt As Long
@@ -481,6 +482,8 @@ Sub subMain_GenSummaryReport()
     Set dictAnyNotFeasible = New Dictionary
     Set dictChapterCnt = New Dictionary
     Set dictItemCnt = New Dictionary
+    Set dictItem2Chapter = New Dictionary
+    
     lFeasibleCnt = 0
     lInProcCnt = 0
     For i = LBound(arrMaster, 1) To UBound(arrMaster, 1)
@@ -505,6 +508,12 @@ Sub subMain_GenSummaryReport()
         Else
             dictChapterCnt(sChapter) = val(dictChapterCnt(sChapter)) + 1
             dictItemCnt(sItem) = val(dictItemCnt(sItem)) + 1
+        End If
+        
+        If Not dictItem2Chapter.Exists(sItem) Then
+            dictItem2Chapter.Add sItem, sChapter
+        Else
+            If sChapter <> dictItem2Chapter(sItem) Then dictItem2Chapter(sItem) = dictItem2Chapter(sItem) & DELIMITER & sChapter
         End If
     Next
     
@@ -557,13 +566,19 @@ Sub subMain_GenSummaryReport()
     Erase arrChapter
     Set dictChapterCnt = Nothing
     
-    Dim sWorst As String
+    Dim arrWorst()
+    ReDim arrWorst(1 To dictWorst.Count, 2)
+    'Dim sWorst As String
     For i = 0 To dictWorst.Count - 1
-        sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "訳"
+        'sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "訳"
+        arrWorst(i + 1, 1) = dictWorst.Keys(i)
+        arrWorst(i + 1, 2) = dictWorst.Items(i) & "訳"
     Next
 
-    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
-    shtReportSummary.Range("F2").value = sWorst
+'    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
+'    shtReportSummary.Range("F2").value = sWorst
+    shtReportSummary.Range("F2").Resize(dictWorst.Count, 2).value = arrWorst
+    Erase arrWorst
     Set dictUniqueChapterCnt = Nothing
     Set dictWorst = Nothing
 '===============
@@ -596,16 +611,26 @@ Sub subMain_GenSummaryReport()
     Erase arrItem
     Set dictItemCnt = Nothing
     
-    sWorst = ""
+    ReDim arrWorst(1 To dictWorst.Count, 3)
+    
+'    sWorst = ""
     For i = 0 To dictWorst.Count - 1
-        sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "訳"
+        'sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "訳"
+        arrWorst(i + 1, 1) = dictWorst.Keys(i)
+        arrWorst(i + 1, 2) = dictItem2Chapter(dictWorst.Keys(i))
+        arrWorst(i + 1, 3) = dictWorst.Items(i) & "訳"
     Next
 
-    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
-    shtReportSummary.Range("G2").value = sWorst
+    'If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
+    'shtReportSummary.Range("G2").value = sWorst
+    shtReportSummary.Range("H2").Resize(dictWorst.Count, 3).value = arrWorst
+    
+    Erase arrWorst
     Set dictUniqueItemCnt = Nothing
     Set dictWorst = Nothing
+    Set dictItem2Chapter = Nothing
     
+    Call fSetConditionFormatForBorders(shtReportSummary, , , , fLetter2Num("H"))
 '    If dictLog.Count > 0 Then
 '        Dim arrLog()
 '        arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
