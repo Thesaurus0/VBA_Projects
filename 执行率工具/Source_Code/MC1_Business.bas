@@ -215,12 +215,12 @@ Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef a
         
             lMergeStartRow = rgMerged.Row
             lEndRow = rgMerged.Row + rgMerged.Rows.Count - 1
-            
-            lTotalItemCnt = lTotalItemCnt + rgMerged.Rows.Count
                         
             sChapter = Trim(arrMaster(lMergeStartRow, colIndex.chapter))
             
             If sChapter = "уб╫з" Then GoTo next_row
+            
+            lTotalItemCnt = lTotalItemCnt + rgMerged.Rows.Count
                 
             For i = lEachRow To lEndRow
                 sItem = Trim(arrMaster(i, colIndex.CriteriaItem))
@@ -461,6 +461,8 @@ Sub subMain_GenSummaryReport()
     Set dictLog = New Dictionary
     
     Call fCopyReadWholeSheetData2Array(shtAllItems, arrMaster)
+    
+    If ArrLen(arrMaster) <= 0 Then fErr "no data found in " & shtAllItems.name
      
     Dim sFile As String
     Dim wb As Workbook
