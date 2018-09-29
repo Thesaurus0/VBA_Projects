@@ -793,7 +793,8 @@ Sub aasdfasdftest()
     
     Dim a
     'a = fGetAllExcelFileListFromSubFolders("F:\VBA_Orders\Excel文件合并工具\Input_Files\第一次反馈a") '
-    Call fDeleteAllFilesFromFolder("F:\VBA_Orders\第一次反馈")
+    'Call fDeleteAllFromFolder("F:\VBA_Orders\第一次反馈")
+    a = fGetAllFilesUnderFolder("F:\VBA_Orders\Excel文件合并工具\Input_Files\第一次反馈")
 End Sub
 
 

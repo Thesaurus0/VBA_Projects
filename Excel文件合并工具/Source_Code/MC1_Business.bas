@@ -2,57 +2,38 @@ Attribute VB_Name = "MC1_Business"
 Option Explicit
 Option Base 1
 
-'Private Const chapter = "章节"
-'Private Const criteria_item = "执行要点"
-'Private Const FEASIBLE_TO_PROCESS = "是否可执行"
-'Private Const PROCESS_ON_THE_WAY = "是否在执行"
-'Private Const REASON_WHY_NOT = "未能执行的具体原因"
-'Private Const YOUR_ACTION = "您的应对策略"
-
-'Type typeCols
-'    chapter As Long
-'    CriteriaItem As Long
-'    Feasible As Long
-'    processOnTheWay As Long
-'    Reason As Long
-'    Action As Long
-'End Type
-
+Dim dictLog As Dictionary
 Sub subMain_MergeExcelFilesFor3Folders()
     Dim arrOutput()
-    Dim dictLog As Dictionary
     Dim lEachRow As Long
     Dim i As Integer
     Dim sMsg As String
-    Dim sFolder As String
+    Dim sTopFolder As String
     Dim sOutputFolder As String
     Dim sProduct As String
-'    Dim arrHeader()
-'    Dim dictNotInProcess As Dictionary
     
     Call fInitialization
-    
-'    arrHeader = Array(chapter, criteria_item, FEASIBLE_TO_PROCESS, PROCESS_ON_THE_WAY, REASON_WHY_NOT, YOUR_ACTION)
-    
+     
     On Error GoTo error_handling
     
     Set dictLog = New Dictionary
     
-    sFolder = fSelectFolderDialog(ThisWorkbook.Path) '
-    If Len(sFolder) <= 0 Then fErr '
+    sTopFolder = fSelectFolderDialog(ThisWorkbook.Path) '
+    If Len(sTopFolder) <= 0 Then fErr '
     
-    sOutputFolder = sFolder & "Output" '& Format(Now(), "yyyymmddHHMMSS")
+    sOutputFolder = fGetFileParentFolder(sTopFolder) & "Output\" '& Format(Now(), "yyyymmddHHMMSS")
     
     If fFolderExists(sOutputFolder) Then
         If fPromptToConfirmToContinue("The output folder already exists, all files will be deleted first, are you sure to continue?" _
                  & vbCr & sOutputFolder) Then
-            fDeleteAllFilesFromFolder(
+            Call fDeleteAllFromFolder(sOutputFolder)
         Else
             fErr
         End If
+    Else
+        Call fCheckPath(sOutputFolder, True)
     End If
     
-
     Call fDeleteRowsFromSheetLeaveHeader(shtLog)
     Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
     
@@ -60,18 +41,18 @@ Sub subMain_MergeExcelFilesFor3Folders()
     Dim sOriginFolder As String
     Dim sFirstResponseFolder As String
     Dim sSecondResponseFolder As String
-    sOriginFolder = sFolder & "原稿\"
-    sFirstResponseFolder = sFolder & "第一次反馈\"
-    sSecondResponseFolder = sFolder & "第二次反馈\"
+    sOriginFolder = sTopFolder & "原稿\"
+    sFirstResponseFolder = sTopFolder & "第一次反馈\"
+    sSecondResponseFolder = sTopFolder & "第二次反馈\"
     
     If Not (gFSO.FolderExists(sOriginFolder) And gFSO.FolderExists(sFirstResponseFolder) And gFSO.FolderExists(sSecondResponseFolder)) Then
         fErr "There must be 3 folders there, but any one was not found:" & vbCr & vbCr _
              & sOriginFolder
     End If
     
-    Dim arrOrigin()
-    Dim arrFirst()
-    Dim arrSecond()
+    Dim arrOrigin
+    Dim arrFirst
+    Dim arrSecond
     arrOrigin = fGetAllExcelFileListFromSubFolders(sOriginFolder)
     
     If ArrLen(arrOrigin) <= 0 Then fErr "No file was found in folder " & vbCr & sOriginFolder
@@ -79,97 +60,119 @@ Sub subMain_MergeExcelFilesFor3Folders()
     arrFirst = fGetAllExcelFileListFromSubFolders(sFirstResponseFolder)
     arrSecond = fGetAllExcelFileListFromSubFolders(sSecondResponseFolder)
     
-    Dim i As Long
+    Dim dictFirst As Dictionary
+    Set dictFirst = fReadFile3Letters(arrFirst)
+    Erase arrFirst
+    Dim dictSecond As Dictionary
+    Set dictSecond = fReadFile3Letters(arrSecond)
+    Erase arrSecond
     
+    Dim sParentFolder As String
+    Dim sOrigFile As String
+    Dim wbSource As Workbook
+    Dim wbOut As Workbook
+    Dim sht As Worksheet
+    Dim sOutputFile As String
+    Dim sFileNetName As String
+    Dim j As Long
+    Dim sSubPrtFolder As String
+    Dim sBaseName As String
+    Dim sFileLetter As String
+    Dim sOtherFile As String
+    
+    ReDim arrOutput(LBound(arrOrigin) To UBound(arrOrigin), 1 To 8)
+    sOutputFolder = fCheckPath(sOutputFolder)
     For i = LBound(arrOrigin) To UBound(arrOrigin)
-        sFile = arrOrigin(i)
-        sFileNetName = fGetFileNetName(sFile)
+        sOrigFile = arrOrigin(i)
+        sFileNetName = fGetFileNetName(sOrigFile)
+        sBaseName = fGetFileBaseName(sOrigFile)
         
-    Next
-    
-'    Dim sFile As String
-'    Dim wb As Workbook
-'    Dim shtInput As Worksheet
-'    Dim bAlreadyOpened As Boolean
-'    Dim arrColIndex()
-'    Dim lHeaderAtRow  As Long
-'    Dim dblFeasibleRate As Double
-''    Dim colIndex As typeCols
-'    Dim sFileNetName As String
-'    Dim dblInprocessRate As Double
-'    Dim j As Long
-'    Dim sNotInProc As String
-'    Dim sNotInProcReason As String
-'    Dim dictAllItems As Dictionary
-'
-'    For i = LBound(arrFiles) To UBound(arrFiles)
-'        sFile = arrFiles(i)
-'        sFileNetName = fGetFileNetName(sFile)
-'
-'        If Left(sFileNetName, 1) = "~" Then GoTo next_file
-'        If Left(sFileNetName, 1) = "$" Then GoTo next_file
-'
-''        Set dictNotInProcess = New Dictionary
-'
-'        Set wb = fOpenWorkbook(sFile, bAlreadyOpened, False, , shtInput)
-'
-'        Call fFindAllColumnsIndexByColNames(shtInput.Rows("1:10"), arrHeader, arrColIndex, lHeaderAtRow)
-'
-'        colIndex.chapter = arrColIndex(LBound(arrColIndex))
-'        colIndex.CriteriaItem = arrColIndex(LBound(arrColIndex) + 1)
-'        colIndex.Feasible = arrColIndex(LBound(arrColIndex) + 2)
-'        colIndex.processOnTheWay = arrColIndex(LBound(arrColIndex) + 3)
-'        colIndex.Reason = arrColIndex(LBound(arrColIndex) + 4)
-'        colIndex.Action = arrColIndex(LBound(arrColIndex) + 5)
-'
-'        If shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeCells Then lHeaderAtRow = shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Row + shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Rows.Count - 1
-'        arrMaster = fGetRangeByStartEndPos(shtInput, 1, 1, fGetValidMaxRow(shtInput), fGetValidMaxCol(shtInput)).value
-'
-'        Call fFillArrayByMergedCells(arrMaster, colIndex.Reason, shtInput, lHeaderAtRow + 1)
-'        Call fFillArrayByMergedCells(arrMaster, colIndex.Action, shtInput, lHeaderAtRow + 1)
-'        dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
-'        , dictLog, dictNotInProcess, dblInprocessRate, dictAllItems)
-'
-'        If Not bAlreadyOpened Then Call fCloseWorkBookWithoutSave(wb)
-'
-'        If dictNotInProcess.Count > 0 Then
-'            ReDim arrOutput(1 To dictNotInProcess.Count, 1 To 8)
-'            'Set dictNotInProcess = fConsolidateAndCalculate(arrMaster, colIndex)
-'            Erase arrMaster
-'
-'            For j = 0 To dictNotInProcess.Count - 1
-'                arrOutput(j + 1, 1) = sFileNetName
-'                arrOutput(j + 1, 2) = dblFeasibleRate
-'                arrOutput(j + 1, 3) = dblInprocessRate
-'
-'                sNotInProc = dictNotInProcess.Keys(j)
-'                sNotInProcReason = dictNotInProcess.Items(j)
-'                arrOutput(j + 1, 4) = Split(sNotInProc, DELIMITER)(0)
-'                arrOutput(j + 1, 5) = Split(sNotInProc, DELIMITER)(1)
-'
-'                arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
-'                arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
-'            Next
-'        Else
-'            ReDim arrOutput(1 To 1, 1 To 8)
-'            Erase arrMaster
-'
-'            arrOutput(1, 1) = sFileNetName
-'            arrOutput(1, 2) = dblFeasibleRate
-'            arrOutput(1, 3) = 1
-'        End If
-'
-'        Call fAppendArray2Sheet(shtReportDetails, arrOutput)
-'        Call fAppendArray2Sheet(shtAllItems, fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictAllItems))
-'next_file:
-'        Set dictAllItems = Nothing
-'    Next
+        If Len(sOrigFile) - Len(sOriginFolder) - Len(sBaseName) - 1 > 0 Then
+            sSubPrtFolder = Right(sOrigFile, Len(sOrigFile) - Len(sOriginFolder))
+            sSubPrtFolder = Left(sSubPrtFolder, Len(sSubPrtFolder) - Len(sBaseName))
+            sOutputFile = sOutputFolder & sSubPrtFolder & sFileNetName & "_tmp.xlsx"
+        Else
+            sOutputFile = sOutputFolder & sFileNetName & "_tmp.xlsx"
+        End If
+        
+        Set wbSource = fOpenWorkbook(sOrigFile, , True, , sht)
+                
+        If wbSource.Worksheets.Count > 1 Then
+            For j = 1 To wbSource.Worksheets.Count
+                If j = 1 Then
+                    Set wbOut = fCopySingleSheet2NewWorkbookFile(sht, sOutputFile, "原稿" & j)
+                Else
+                    Call fCopySingleSheet2WorkBook(sht, wbOut, "原稿" & j)
+                End If
+            Next
+        Else
+            Set wbOut = fCopySingleSheet2NewWorkbookFile(sht, sOutputFile, "原稿")
+        End If
+        
+        arrOutput(i, 1) = sFileNetName
+        
+        Call fCloseWorkBookWithoutSave(wbSource)
+        Set wbSource = Nothing
+        
+        'first responce
+        sFileLetter = Left(sFileNetName, 3)
+        
+        If dictFirst.Exists(sFileLetter) Then
+            sOtherFile = dictFirst(sFileLetter)
+            Set wbSource = fOpenWorkbook(sOtherFile, , True, , sht)
 
-'    Call fAppendArray2Sheet(shtPurchaseODByProduct, arrOutput)
+            If wbSource.Worksheets.Count > 1 Then
+                For j = 1 To wbSource.Worksheets.Count
+                    Call fCopySingleSheet2WorkBook(sht, wbOut, "第一次反馈" & j)
+                Next
+            Else
+                Call fCopySingleSheet2WorkBook(sht, wbOut, "第一次反馈")
+            End If
+            
+            wbOut.Worksheets(wbOut.Worksheets.Count).Move before:=wbOut.Worksheets(1)
+            
+            Call fCloseWorkBookWithoutSave(wbSource)
+            arrOutput(i, 2) = "有第一次反馈文件"
+'        Else
+'            dictLog.Add dictLog.Count + 1 & DELIMITER & sFileLetter & " cannot find the file of 第一次反馈", ""
+        End If
+        
+        'second response
+        If dictSecond.Exists(sFileLetter) Then
+            sOtherFile = dictSecond(sFileLetter)
+            Set wbSource = fOpenWorkbook(sOtherFile, , True, , sht)
+            
+            If Not dictFirst.Exists(sFileLetter) Then
+                dictLog.Add dictLog.Count + 1 & DELIMITER & sFileLetter & " 没有第一次反馈, 却有第二次所馈", ""
+            End If
+                    
+            If wbSource.Worksheets.Count > 1 Then
+                For j = 1 To wbSource.Worksheets.Count
+                    Call fCopySingleSheet2WorkBook(sht, wbOut, "第二次反馈" & j)
+                Next
+            Else
+                    Call fCopySingleSheet2WorkBook(sht, wbOut, "第二次反馈")
+            End If
+            
+            wbOut.Worksheets(wbSource.Worksheets.Count + 1).Move after:=wbOut.Worksheets(wbOut.Worksheets.Count)
+            
+            Call fCloseWorkBookWithoutSave(wbSource)
+            arrOutput(i, 3) = "有第二次反馈文件"
+'        Else
+'            dictLog.Add dictLog.Count + 1 & DELIMITER & sFileLetter & " cannot find the file of 第二次反馈", ""
+        End If
+        
+        Call fSaveAndCloseWorkBook(wbOut)
+        
+        Name sOutputFile As Left(sOutputFile, Len(sOutputFile) - Len("_tmp.xlsx")) & ".xlsx"
+    Next
+    Set dictFirst = Nothing
+    Set dictSecond = Nothing
+     
+    Call fAppendArray2Sheet(shtReportDetails, arrOutput)
     Call fSetConditionFormatForBorders(shtReportDetails, , 2, , 1)
     Call fSetConditionFormatForOddEvenLine(shtReportDetails, , 2, , 1)
-     
-'
+
     If dictLog.Count > 0 Then
         Dim arrLog()
         arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
@@ -184,7 +187,7 @@ Sub subMain_MergeExcelFilesFor3Folders()
     End If
 error_handling:
 '    Set dictNotInProcess = Nothing
-    Erase arrFiles
+    'Erase arrFiles
 '    Erase arrVendorPrices
     Erase arrOutput
     
@@ -208,6 +211,29 @@ error_handling:
 reset_excel_options:
     Err.Clear
     fClearGlobalVarialesResetOption
+End Sub
+
+Function fReadFile3Letters(arrFirst)
+    Dim dictOut As New Dictionary
+    
+    Dim lEach As Long
+    Dim sFile As String
+    Dim sLetter As String
+    
+    For lEach = LBound(arrFirst) To UBound(arrFirst)
+        sFile = arrFirst(lEach)
+        sLetter = Left(fGetFileNetName(sFile), 3)
+        'sLetter = Replace(fGetFileNetName(sFile), 3)
+        
+        If Not dictOut.Exists(sLetter) Then
+            dictOut.Add sLetter, sFile
+        Else
+            dictLog.Add dictLog.Count + 1 & DELIMITER & "duplicate file's letter " & sLetter & " was found : " & sFile, ""
+        End If
+    Next
+    
+    Set fReadFile3Letters = dictOut
+    Set dictOut = Nothing
 End Function
 
  
@@ -354,226 +380,4 @@ Function fExtractProductFromPriceConfigSheet()
     Erase arrData
     Set dictProd = Nothing
 End Function
- 
-Sub subMain_GenSummaryReport()
-    Dim arrOutput()
-    Dim dictLog As Dictionary
-    Dim lEachRow As Long
-    Dim i As Long
-    Dim sMsg As String
-    Dim sFolder As String
-    Dim dblPrice As Double
-    Dim sProduct As String
-    Dim dictNotInProcess As Dictionary
-    
-    Call fInitialization
-
-    On Error GoTo error_handling
-    fGetRangeByStartEndPos(shtReportSummary, 2, 1, 2 + fGetValidMaxRow(shtReportSummary), 10).ClearContents
-    
-    Set dictLog = New Dictionary
-    
-    Call fCopyReadWholeSheetData2Array(shtAllItems, arrMaster)
-    
-    If ArrLen(arrMaster) <= 0 Then fErr "no data found in " & shtAllItems.name
-     
-    Dim sFile As String
-    Dim wb As Workbook
-    Dim sFeasible  As String
-    Dim j As Long
-    Dim dictUniqueFiles As Dictionary
-    Dim dictAnyNotFeasible As Dictionary
-    Dim dictChapterCnt As Dictionary
-    Dim dictItemCnt As Dictionary
-    Dim dictItem2Chapter As Dictionary
-    
-    Dim lFeasibleCnt As Long
-    Dim lInProcCnt As Long
-    Dim sInProcess As String
-    Dim sItem As String
-    Dim sChapter As String
-    
-    Set dictUniqueFiles = New Dictionary
-    Set dictAnyNotFeasible = New Dictionary
-    Set dictChapterCnt = New Dictionary
-    Set dictItemCnt = New Dictionary
-    Set dictItem2Chapter = New Dictionary
-    
-    lFeasibleCnt = 0
-    lInProcCnt = 0
-    For i = LBound(arrMaster, 1) To UBound(arrMaster, 1)
-        sFile = Trim(arrMaster(i, 1))
-        sChapter = Trim(arrMaster(i, 2))
-        sItem = Trim(arrMaster(i, 3))
-        sFeasible = Trim(arrMaster(i, 4))
-        sInProcess = Trim(arrMaster(i, 5))
-        
-        If Not dictUniqueFiles.Exists(sFile) Then
-            dictUniqueFiles.Add sFile, ""
-        End If
-        
-        If sFeasible = "是" Then
-            lFeasibleCnt = lFeasibleCnt + 1
-        Else
-            dictAnyNotFeasible(sFile) = ""
-        End If
-        
-        If sInProcess = "是" Then
-            lInProcCnt = lInProcCnt + 1
-        Else
-            dictChapterCnt(sChapter) = val(dictChapterCnt(sChapter)) + 1
-            dictItemCnt(sItem) = val(dictItemCnt(sItem)) + 1
-        End If
-        
-        If Not dictItem2Chapter.Exists(sItem) Then
-            dictItem2Chapter.Add sItem, sChapter
-        Else
-            If sChapter <> dictItem2Chapter(sItem) Then dictItem2Chapter(sItem) = dictItem2Chapter(sItem) & DELIMITER & sChapter
-        End If
-    Next
-    
-    Dim dictAllFeasible As Dictionary
-    Set dictAllFeasible = New Dictionary
-    For i = 0 To dictUniqueFiles.Count - 1
-        sFile = dictUniqueFiles.Keys(i)
-        If Not dictAnyNotFeasible.Exists(sFile) Then
-            dictAllFeasible.Add sFile, ""
-        End If
-    Next
-    
-    shtReportSummary.Range("A2").value = dictUniqueFiles.Count
-    shtReportSummary.Range("B2").value = lFeasibleCnt / ArrLen(arrMaster, 1)
-    shtReportSummary.Range("C2").value = lInProcCnt / ArrLen(arrMaster, 1)
-    shtReportSummary.Range("D2").value = dictAllFeasible.Count
-    shtReportSummary.Range("E2").value = dictUniqueFiles.Count - dictAllFeasible.Count
-    
-    Set dictUniqueFiles = Nothing
-    Set dictAllFeasible = Nothing
-    
-    '====================================
-    Dim arrChapter()
-    
-    Dim dictUniqueChapterCnt As Dictionary
-    Set dictUniqueChapterCnt = New Dictionary
-    For i = 0 To dictChapterCnt.Count - 1
-        dictUniqueChapterCnt(dictChapterCnt.Items(i)) = ""
-    Next
-    
-    arrChapter = dictUniqueChapterCnt.Keys()
-    Set dictUniqueChapterCnt = Nothing
-    
-    Call fSortArrayDesc(arrChapter)
-    
-    If ArrLen(arrChapter) > 11 Then
-        ReDim Preserve arrChapter(0 To 10)
-    End If
-
-    Dim dictWorst As Dictionary
-    Set dictWorst = New Dictionary
-        
-    For j = LBound(arrChapter) To UBound(arrChapter)
-        For i = 0 To dictChapterCnt.Count - 1
-            If dictChapterCnt.Items(i) = arrChapter(j) Then
-                dictWorst(dictChapterCnt.Keys(i)) = dictChapterCnt.Items(i)
-            End If
-        Next
-    Next
-    Erase arrChapter
-    Set dictChapterCnt = Nothing
-    
-    Dim arrWorst()
-    ReDim arrWorst(1 To dictWorst.Count, 2)
-    'Dim sWorst As String
-    For i = 0 To dictWorst.Count - 1
-        'sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "条"
-        arrWorst(i + 1, 1) = dictWorst.Keys(i)
-        arrWorst(i + 1, 2) = dictWorst.Items(i) & "条"
-    Next
-
-'    If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
-'    shtReportSummary.Range("F2").value = sWorst
-    shtReportSummary.Range("F2").Resize(dictWorst.Count, 2).value = arrWorst
-    Erase arrWorst
-    Set dictUniqueChapterCnt = Nothing
-    Set dictWorst = Nothing
-'===============
-    Dim arrItem()
-    
-    Dim dictUniqueItemCnt As Dictionary
-    Set dictUniqueItemCnt = New Dictionary
-    For i = 0 To dictItemCnt.Count - 1
-        dictUniqueItemCnt(dictItemCnt.Items(i)) = ""
-    Next
-    
-    arrItem = dictUniqueItemCnt.Keys()
-    Set dictUniqueItemCnt = Nothing
-    
-    Call fSortArrayDesc(arrItem)
-    
-    If ArrLen(arrItem) > 20 Then
-        ReDim Preserve arrItem(0 To 19)
-    End If
-
-    Set dictWorst = New Dictionary
-        
-    For j = LBound(arrItem) To UBound(arrItem)
-        For i = 0 To dictItemCnt.Count - 1
-            If dictItemCnt.Items(i) = arrItem(j) Then
-                dictWorst(dictItemCnt.Keys(i)) = dictItemCnt.Items(i)
-            End If
-        Next
-    Next
-    Erase arrItem
-    Set dictItemCnt = Nothing
-    
-    ReDim arrWorst(1 To dictWorst.Count, 3)
-    
-'    sWorst = ""
-    For i = 0 To dictWorst.Count - 1
-        'sWorst = sWorst & vbLf & dictWorst.Keys(i) & " :  " & dictWorst.Items(i) & "条"
-        arrWorst(i + 1, 1) = dictWorst.Keys(i)
-        arrWorst(i + 1, 2) = dictItem2Chapter(dictWorst.Keys(i))
-        arrWorst(i + 1, 3) = dictWorst.Items(i) & "条"
-    Next
-
-    'If Len(sWorst) > 0 Then sWorst = Right(sWorst, Len(sWorst) - 1)
-    'shtReportSummary.Range("G2").value = sWorst
-    shtReportSummary.Range("H2").Resize(dictWorst.Count, 3).value = arrWorst
-    
-    Erase arrWorst
-    Set dictUniqueItemCnt = Nothing
-    Set dictWorst = Nothing
-    Set dictItem2Chapter = Nothing
-    
-    Call fSetConditionFormatForBorders(shtReportSummary, , , , fLetter2Num("H"))
-'    If dictLog.Count > 0 Then
-'        Dim arrLog()
-'        arrLog = fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictLog)
-'        Call fAppendArray2Sheet(shtLog, arrLog)
-'
-'
-'        Call fSetConditionFormatForBorders(shtLog, , , , 1)
-'        Call fSetConditionFormatForOddEvenLine(shtLog, , , , 1)
-'    End If
-error_handling:
-    Set dictUniqueFiles = Nothing
-    Set dictNotInProcess = Nothing
-    
-'    Erase arrVendorPrices
-    Erase arrOutput
-    
-    If gErrNum <> 0 Then GoTo reset_excel_options
-    If fCheckIfUnCapturedExceptionAbnormalError Then GoTo reset_excel_options
-    
-    Application.ScreenUpdating = True
-    Call fShowAndActiveSheet(shtReportSummary)
-    
-    sMsg = "处理完成, please check the sheet : " & shtReportSummary.name
-    
-    MsgBox sMsg, IIf(dictLog.Count > 0, vbCritical, vbInformation)
-    Set dictLog = Nothing
-    
-reset_excel_options:
-    Err.Clear
-    fClearGlobalVarialesResetOption
-End Sub
+  

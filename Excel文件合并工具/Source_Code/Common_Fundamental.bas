@@ -453,7 +453,7 @@ End Function
 
 Function fGetFileParentFolder(asFileFullPath As String) As String
     fGetFSO
-    fGetFileParentFolder = gFSO.GetParentFolderName(asFileFullPath)
+    fGetFileParentFolder = fCheckPath(gFSO.GetParentFolderName(asFileFullPath))
 End Function
 
 Function fGetFileBaseName(asFileFullPath As String) As String
@@ -2831,26 +2831,65 @@ Function fFolderExists(sFolder As String) As Boolean
     fFolderExists = gFSO.FolderExists(sFolder)
 End Function
 
-Function fDeleteAllFilesFromFolder(sFolder As String)
+'Function fDeleteAllFilesFromFolder(sFolder As String, Optional LeaveTopFolder As Boolean = True, Optional DeleteAllFolder As Boolean = True)
+'    fGetFSO
+'
+'    Dim aFile As File
+'    Dim aSubFolder As Folder
+'
+'    If gFSO.FolderExists(sFolder) Then
+'        For Each aFile In gFSO.GetFolder(sFolder).Files
+'            aFile.Delete True
+'        Next
+'
+'        For Each aSubFolder In gFSO.GetFolder(sFolder).SubFolders
+'            Call fDeleteAllFilesFromFolder(aSubFolder.Path, DeleteAllFolder)
+'        Next
+'
+'        If DeleteAllFolder Then Call gFSO.DeleteFolder(sFolder)
+'    End If
+'
+'    Set aFile = Nothing
+'    Set aSubFolder = Nothing
+'End Function
+
+Function fDeleteAllFromFolder(sFolder As String)
     fGetFSO
 
     Dim aFile As File
     Dim aSubFolder As Folder
 
     If gFSO.FolderExists(sFolder) Then
-        For Each aSubFolder In gFSO.GetFolder(sFolder).SubFolders
-            Call fDeleteAllFilesFromFolder(aSubFolder.Path)
-        Next
-        
         For Each aFile In gFSO.GetFolder(sFolder).Files
             aFile.Delete True
         Next
         
-        gFSO.DeleteFolder (sFolder)
+        For Each aSubFolder In gFSO.GetFolder(sFolder).SubFolders
+            Call fDeleteAllFilesFromFolder(aSubFolder.Path, False)
+        Next
     End If
     
     Set aFile = Nothing
     Set aSubFolder = Nothing
 End Function
+Function fDeleteAllFilesFromFolder(sFolder As String, Optional LeaveAllFolder As Boolean = False)
+    fGetFSO
 
+    Dim aFile As File
+    Dim aSubFolder As Folder
 
+    If gFSO.FolderExists(sFolder) Then
+        For Each aFile In gFSO.GetFolder(sFolder).Files
+            aFile.Delete True
+        Next
+        
+        For Each aSubFolder In gFSO.GetFolder(sFolder).SubFolders
+            Call fDeleteAllFilesFromFolder(aSubFolder.Path, LeaveAllFolder)
+        Next
+        
+        If Not LeaveAllFolder Then Call gFSO.DeleteFolder(sFolder)
+    End If
+    
+    Set aFile = Nothing
+    Set aSubFolder = Nothing
+End Function
