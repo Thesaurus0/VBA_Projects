@@ -413,7 +413,7 @@ Function fSelectSaveAsFileDialog(Optional asDeafaulfFilePath As String = "", Opt
     ChDrive gFSO.GetDriveName(sDefaultFolder)
     ChDir sDefaultFolder
     sOut = Application.GetSaveAsFilename(InitialFileName:=sDefaultFile _
-                        , filefilter:=asFileFilters _
+                        , FileFilter:=asFileFilters _
                         , Title:=IIf(Len(Trim(asTitle)) > 0, asTitle, sDefaultFile))
     If sOut = False Then sOut = ""
     fSelectSaveAsFileDialog = sOut
@@ -1181,7 +1181,7 @@ Function fValidateDuplicateInArrayForCombineCols(arrParam, arrKeyCols _
         If dict.Exists(sKeyStr) Then
             sPos = Replace(sPos, "ACTUAL_ROW_NO", lActualRow)
             fShowSheet shtAt
-            Application.GoTo shtAt.Cells(lActualRow, arrKeyCols(UBound(arrKeyCols)))
+            Application.Goto shtAt.Cells(lActualRow, arrKeyCols(UBound(arrKeyCols)))
             fErr "Duplicate key was found:" & vbCr & sKeyStr & vbCr & sPos
         Else
             dict.Add sKeyStr, 0
@@ -1315,7 +1315,7 @@ Function fValidateDuplicateInArrayForSingleCol(arrParam, lKeyCol As Long _
                 'sPos = sPos & lActualRow & " / " & sColLetter
                 sPos = Replace(sPos, "ACTUAL_ROW_NO", lActualRow)
                 fShowSheet shtAt
-                Application.GoTo shtAt.Cells(lActualRow, lKeyCol)
+                Application.Goto shtAt.Cells(lActualRow, lKeyCol)
                 fErr "Keys [" & sColLetter & "] is blank!" & sPos
             End If
             
@@ -1326,7 +1326,7 @@ Function fValidateDuplicateInArrayForSingleCol(arrParam, lKeyCol As Long _
             'sPos = sPos & lActualRow & " / " & sColLetter
             sPos = Replace(sPos, "ACTUAL_ROW_NO", lActualRow)
             fShowSheet shtAt
-            Application.GoTo shtAt.Cells(lActualRow, lKeyCol)
+            Application.Goto shtAt.Cells(lActualRow, lKeyCol)
             fErr "Duplicate key [" & sKeyStr & "] was found " & sPos
         Else
             dict.Add sKeyStr, 0
@@ -2765,6 +2765,92 @@ Function fSelectMultipleFileDialog(Optional asDefaultFilePath As String = "" _
 
     fSelectMultipleFileDialog = arrOut
     Erase arrOut
+End Function
+
+Function fReadTextFileAllLinesToArray(sFileFullPath As String, Optional sLineBreak As String = vbCrLf)
+    Dim sContent
+    Dim iFileNum As Long
+
+    On Error GoTo exit_fun
+
+    iFileNum = FreeFile
+    Open sFileFullPath For Input As #iFileNum
+
+    'sContent = Input(LOF(iFileNum), #iFileNum)
+    sContent = StrConv(InputB(LOF(iFileNum), #iFileNum), vbUnicode)
+
+    Close #iFileNum
+
+    Dim arrFileLines
+    Dim sLastLine As String
+
+    fReadTextFileAllLinesToArray = Split(sContent, sLineBreak)
+    sContent = ""
+exit_fun:
+    Close #iFileNum
+    If Err.Number <> 0 Then fErr Err.Description
+End Function
+
+Function fGetAllExcelFileListFromSubFolders(sFolder As String)
+    Dim sCmd As String
+    Const QUOTA = """"
+    
+    sFolder = fCheckPath(sFolder)
+
+    Dim sOutput As String
+    Dim wsh As WshShell
+    Set wsh = New WshShell
+    
+    sCmd = "cmd /c dir /b/s " & QUOTA & sFolder & "*.xls" & QUOTA _
+         & " & " _
+         & "cmd /c dir /b/s " & QUOTA & sFolder & "*.xlsx" & QUOTA
+    
+    sOutput = wsh.Exec(sCmd).StdOut.ReadAll
+    
+    Set wsh = Nothing
+    
+    Dim arrOutput
+    
+    arrOutput = Split(Trim(sOutput), vbCrLf)
+    
+    If ArrLen(arrOutput) > 0 Then
+        If Len(Trim(arrOutput(UBound(arrOutput)))) <= 0 Then
+            ReDim Preserve arrOutput(LBound(arrOutput) To UBound(arrOutput) - 1)
+        End If
+    Else
+        arrOutput = Array()
+    End If
+    
+    fGetAllExcelFileListFromSubFolders = arrOutput
+    Erase arrOutput
+End Function
+ 
+
+Function fFolderExists(sFolder As String) As Boolean
+    fGetFSO
+    fFolderExists = gFSO.FolderExists(sFolder)
+End Function
+
+Function fDeleteAllFilesFromFolder(sFolder As String)
+    fGetFSO
+
+    Dim aFile As File
+    Dim aSubFolder As Folder
+
+    If gFSO.FolderExists(sFolder) Then
+        For Each aSubFolder In gFSO.GetFolder(sFolder).SubFolders
+            Call fDeleteAllFilesFromFolder(aSubFolder.Path)
+        Next
+        
+        For Each aFile In gFSO.GetFolder(sFolder).Files
+            aFile.Delete True
+        Next
+        
+        gFSO.DeleteFolder (sFolder)
+    End If
+    
+    Set aFile = Nothing
+    Set aSubFolder = Nothing
 End Function
 
 

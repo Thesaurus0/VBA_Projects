@@ -19,14 +19,13 @@ Option Base 1
 'End Type
 
 Sub subMain_MergeExcelFilesFor3Folders()
-    Dim arrFiles()
     Dim arrOutput()
     Dim dictLog As Dictionary
     Dim lEachRow As Long
     Dim i As Integer
     Dim sMsg As String
     Dim sFolder As String
-    Dim dblPrice As Double
+    Dim sOutputFolder As String
     Dim sProduct As String
 '    Dim arrHeader()
 '    Dim dictNotInProcess As Dictionary
@@ -41,9 +40,22 @@ Sub subMain_MergeExcelFilesFor3Folders()
     
     sFolder = fSelectFolderDialog(ThisWorkbook.Path) '
     If Len(sFolder) <= 0 Then fErr '
-'    arrFiles = fGetFilesFromFolder(sFolder)
-'    arrFiles = fSelectMultipleFileDialog(ThisWorkbook.Path, "Excel File=*.xlsx;*.xls", "Please select files")
+    
+    sOutputFolder = sFolder & "Output" '& Format(Now(), "yyyymmddHHMMSS")
+    
+    If fFolderExists(sOutputFolder) Then
+        If fPromptToConfirmToContinue("The output folder already exists, all files will be deleted first, are you sure to continue?" _
+                 & vbCr & sOutputFolder) Then
+            fDeleteAllFilesFromFolder(
+        Else
+            fErr
+        End If
+    End If
+    
 
+    Call fDeleteRowsFromSheetLeaveHeader(shtLog)
+    Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
+    
     fGetFSO
     Dim sOriginFolder As String
     Dim sFirstResponseFolder As String
@@ -57,95 +69,106 @@ Sub subMain_MergeExcelFilesFor3Folders()
              & sOriginFolder
     End If
     
-    If ArrLen(arrFiles) <= 0 Then fErr
+    Dim arrOrigin()
+    Dim arrFirst()
+    Dim arrSecond()
+    arrOrigin = fGetAllExcelFileListFromSubFolders(sOriginFolder)
     
-    Call fDeleteRowsFromSheetLeaveHeader(shtLog)
-    Call fDeleteRowsFromSheetLeaveHeader(shtReportDetails)
-    Call fDeleteRowsFromSheetLeaveHeader(shtAllItems)
+    If ArrLen(arrOrigin) <= 0 Then fErr "No file was found in folder " & vbCr & sOriginFolder
     
-    Dim sFile As String
-    Dim wb As Workbook
-    Dim shtInput As Worksheet
-    Dim bAlreadyOpened As Boolean
-    Dim arrColIndex()
-    Dim lHeaderAtRow  As Long
-    Dim dblFeasibleRate As Double
-    Dim colIndex As typeCols
-    Dim sFileNetName As String
-    Dim dblInprocessRate As Double
-    Dim j As Long
-    Dim sNotInProc As String
-    Dim sNotInProcReason As String
-    Dim dictAllItems As Dictionary
+    arrFirst = fGetAllExcelFileListFromSubFolders(sFirstResponseFolder)
+    arrSecond = fGetAllExcelFileListFromSubFolders(sSecondResponseFolder)
     
-    For i = LBound(arrFiles) To UBound(arrFiles)
-        sFile = arrFiles(i)
+    Dim i As Long
+    
+    For i = LBound(arrOrigin) To UBound(arrOrigin)
+        sFile = arrOrigin(i)
         sFileNetName = fGetFileNetName(sFile)
         
-        If Left(sFileNetName, 1) = "~" Then GoTo next_file
-        If Left(sFileNetName, 1) = "$" Then GoTo next_file
-        
-        Set dictNotInProcess = New Dictionary
-        
-        Set wb = fOpenWorkbook(sFile, bAlreadyOpened, False, , shtInput)
-        
-        Call fFindAllColumnsIndexByColNames(shtInput.Rows("1:10"), arrHeader, arrColIndex, lHeaderAtRow)
-        
-        colIndex.chapter = arrColIndex(LBound(arrColIndex))
-        colIndex.CriteriaItem = arrColIndex(LBound(arrColIndex) + 1)
-        colIndex.Feasible = arrColIndex(LBound(arrColIndex) + 2)
-        colIndex.processOnTheWay = arrColIndex(LBound(arrColIndex) + 3)
-        colIndex.Reason = arrColIndex(LBound(arrColIndex) + 4)
-        colIndex.Action = arrColIndex(LBound(arrColIndex) + 5)
-        
-        If shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeCells Then lHeaderAtRow = shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Row + shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Rows.Count - 1
-        arrMaster = fGetRangeByStartEndPos(shtInput, 1, 1, fGetValidMaxRow(shtInput), fGetValidMaxCol(shtInput)).value
-        
-        Call fFillArrayByMergedCells(arrMaster, colIndex.Reason, shtInput, lHeaderAtRow + 1)
-        Call fFillArrayByMergedCells(arrMaster, colIndex.Action, shtInput, lHeaderAtRow + 1)
-        dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
-        , dictLog, dictNotInProcess, dblInprocessRate, dictAllItems)
-        
-        If Not bAlreadyOpened Then Call fCloseWorkBookWithoutSave(wb)
-        
-        If dictNotInProcess.Count > 0 Then
-            ReDim arrOutput(1 To dictNotInProcess.Count, 1 To 8)
-            'Set dictNotInProcess = fConsolidateAndCalculate(arrMaster, colIndex)
-            Erase arrMaster
-            
-            For j = 0 To dictNotInProcess.Count - 1
-                arrOutput(j + 1, 1) = sFileNetName
-                arrOutput(j + 1, 2) = dblFeasibleRate
-                arrOutput(j + 1, 3) = dblInprocessRate
-                
-                sNotInProc = dictNotInProcess.Keys(j)
-                sNotInProcReason = dictNotInProcess.Items(j)
-                arrOutput(j + 1, 4) = Split(sNotInProc, DELIMITER)(0)
-                arrOutput(j + 1, 5) = Split(sNotInProc, DELIMITER)(1)
-                
-                arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
-                arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
-            Next
-        Else
-            ReDim arrOutput(1 To 1, 1 To 8)
-            Erase arrMaster
-            
-            arrOutput(1, 1) = sFileNetName
-            arrOutput(1, 2) = dblFeasibleRate
-            arrOutput(1, 3) = 1
-        End If
-        
-        Call fAppendArray2Sheet(shtReportDetails, arrOutput)
-        Call fAppendArray2Sheet(shtAllItems, fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictAllItems))
-next_file:
-        Set dictAllItems = Nothing
     Next
+    
+'    Dim sFile As String
+'    Dim wb As Workbook
+'    Dim shtInput As Worksheet
+'    Dim bAlreadyOpened As Boolean
+'    Dim arrColIndex()
+'    Dim lHeaderAtRow  As Long
+'    Dim dblFeasibleRate As Double
+''    Dim colIndex As typeCols
+'    Dim sFileNetName As String
+'    Dim dblInprocessRate As Double
+'    Dim j As Long
+'    Dim sNotInProc As String
+'    Dim sNotInProcReason As String
+'    Dim dictAllItems As Dictionary
+'
+'    For i = LBound(arrFiles) To UBound(arrFiles)
+'        sFile = arrFiles(i)
+'        sFileNetName = fGetFileNetName(sFile)
+'
+'        If Left(sFileNetName, 1) = "~" Then GoTo next_file
+'        If Left(sFileNetName, 1) = "$" Then GoTo next_file
+'
+''        Set dictNotInProcess = New Dictionary
+'
+'        Set wb = fOpenWorkbook(sFile, bAlreadyOpened, False, , shtInput)
+'
+'        Call fFindAllColumnsIndexByColNames(shtInput.Rows("1:10"), arrHeader, arrColIndex, lHeaderAtRow)
+'
+'        colIndex.chapter = arrColIndex(LBound(arrColIndex))
+'        colIndex.CriteriaItem = arrColIndex(LBound(arrColIndex) + 1)
+'        colIndex.Feasible = arrColIndex(LBound(arrColIndex) + 2)
+'        colIndex.processOnTheWay = arrColIndex(LBound(arrColIndex) + 3)
+'        colIndex.Reason = arrColIndex(LBound(arrColIndex) + 4)
+'        colIndex.Action = arrColIndex(LBound(arrColIndex) + 5)
+'
+'        If shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeCells Then lHeaderAtRow = shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Row + shtInput.Cells(lHeaderAtRow, colIndex.chapter).MergeArea.Rows.Count - 1
+'        arrMaster = fGetRangeByStartEndPos(shtInput, 1, 1, fGetValidMaxRow(shtInput), fGetValidMaxCol(shtInput)).value
+'
+'        Call fFillArrayByMergedCells(arrMaster, colIndex.Reason, shtInput, lHeaderAtRow + 1)
+'        Call fFillArrayByMergedCells(arrMaster, colIndex.Action, shtInput, lHeaderAtRow + 1)
+'        dblFeasibleRate = fFillArrayByMergedCellsForSelf(sFileNetName, arrMaster, shtInput, lHeaderAtRow + 1, colIndex _
+'        , dictLog, dictNotInProcess, dblInprocessRate, dictAllItems)
+'
+'        If Not bAlreadyOpened Then Call fCloseWorkBookWithoutSave(wb)
+'
+'        If dictNotInProcess.Count > 0 Then
+'            ReDim arrOutput(1 To dictNotInProcess.Count, 1 To 8)
+'            'Set dictNotInProcess = fConsolidateAndCalculate(arrMaster, colIndex)
+'            Erase arrMaster
+'
+'            For j = 0 To dictNotInProcess.Count - 1
+'                arrOutput(j + 1, 1) = sFileNetName
+'                arrOutput(j + 1, 2) = dblFeasibleRate
+'                arrOutput(j + 1, 3) = dblInprocessRate
+'
+'                sNotInProc = dictNotInProcess.Keys(j)
+'                sNotInProcReason = dictNotInProcess.Items(j)
+'                arrOutput(j + 1, 4) = Split(sNotInProc, DELIMITER)(0)
+'                arrOutput(j + 1, 5) = Split(sNotInProc, DELIMITER)(1)
+'
+'                arrOutput(j + 1, 6) = Split(sNotInProcReason, DELIMITER)(0)
+'                arrOutput(j + 1, 7) = Split(sNotInProcReason, DELIMITER)(1)
+'            Next
+'        Else
+'            ReDim arrOutput(1 To 1, 1 To 8)
+'            Erase arrMaster
+'
+'            arrOutput(1, 1) = sFileNetName
+'            arrOutput(1, 2) = dblFeasibleRate
+'            arrOutput(1, 3) = 1
+'        End If
+'
+'        Call fAppendArray2Sheet(shtReportDetails, arrOutput)
+'        Call fAppendArray2Sheet(shtAllItems, fConvertDictionaryDelimiteredKeysTo2DimenArrayForPaste(dictAllItems))
+'next_file:
+'        Set dictAllItems = Nothing
+'    Next
 
 '    Call fAppendArray2Sheet(shtPurchaseODByProduct, arrOutput)
     Call fSetConditionFormatForBorders(shtReportDetails, , 2, , 1)
     Call fSetConditionFormatForOddEvenLine(shtReportDetails, , 2, , 1)
-    Call fSetConditionFormatForBorders(shtAllItems, , , , 1)
-    Call fSetConditionFormatForOddEvenLine(shtAllItems, , , , 1)
+     
 '
     If dictLog.Count > 0 Then
         Dim arrLog()
@@ -160,7 +183,7 @@ next_file:
         Call fSetConditionFormatForOddEvenLine(shtLog, , , , 1)
     End If
 error_handling:
-    Set dictNotInProcess = Nothing
+'    Set dictNotInProcess = Nothing
     Erase arrFiles
 '    Erase arrVendorPrices
     Erase arrOutput
@@ -185,132 +208,8 @@ error_handling:
 reset_excel_options:
     Err.Clear
     fClearGlobalVarialesResetOption
-End Sub
-
-Private Function fFillArrayByMergedCellsForSelf(sFileBaseName As String, ByRef arrMaster, sht As Worksheet _
-                , lStartRow As Long, colIndex As typeCols, ByRef dictLog As Dictionary _
-                , ByRef dictNotInProcess As Dictionary, ByRef dblInprocessRate As Double, ByRef dictAllItems As Dictionary) As Double
-    Dim lEachRow As Long
-    Dim lMaxRow As Long
-    Dim rgMerged As Range
-    Dim lMergeStartRow As Long
-    Dim lEndRow As Long
-    Dim i As Long
-    Dim lTotalItemCnt As Long
-    Dim dictFeasibleItem As Dictionary
-    Dim dictInProcessItem As Dictionary
-    Dim sChapter As String
-    Dim sItem As String
-    Dim sFeasible As String
-    Dim sInProcess As String
-    Dim sReason As String
-    Dim sAction As String
-    Dim dblFeasibleRate As Double
-    'Dim dblInprocessRate As Double
-    Const YES = "是"
-    Const NO = "否"
-    
-    lMaxRow = ArrLen(arrMaster, 1)
-    
-    Set dictFeasibleItem = New Dictionary
-    
-    Set dictInProcessItem = New Dictionary
-    Set dictNotInProcess = New Dictionary
-    Set dictAllItems = New Dictionary
-    
-'    aValue = ""
-    lTotalItemCnt = 0
-    For lEachRow = lStartRow To lMaxRow
-        If sht.Cells(lEachRow, colIndex.chapter).MergeCells Then
-            Set rgMerged = sht.Cells(lEachRow, colIndex.chapter).MergeArea
-            
-            If rgMerged.Columns.Count > 1 Then GoTo next_row
-        
-            lMergeStartRow = rgMerged.Row
-            lEndRow = rgMerged.Row + rgMerged.Rows.Count - 1
-                        
-            sChapter = Trim(arrMaster(lMergeStartRow, colIndex.chapter))
-            
-            If sChapter = "章节" Then GoTo next_row
-            
-            lTotalItemCnt = lTotalItemCnt + rgMerged.Rows.Count
-                
-            For i = lEachRow To lEndRow
-                sItem = Trim(arrMaster(i, colIndex.CriteriaItem))
-                sFeasible = Trim(arrMaster(i, colIndex.Feasible))
-                sInProcess = Trim(arrMaster(i, colIndex.processOnTheWay))
-                sReason = Trim(arrMaster(i, colIndex.Reason))
-                sAction = Trim(arrMaster(i, colIndex.Action))
-                
-                arrMaster(i, colIndex.chapter) = sChapter
-                
-                If Len(sFeasible) <= 0 Then
-                    dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为空" & DELIMITER & i, ""
-                    GoTo next_sub_row
-                End If
-                
-                If sFeasible = YES Then
-                    If dictFeasibleItem.Exists(sChapter & DELIMITER & sItem) Then
-                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "相同的执行要点,在同一个章节中出现了两次" & DELIMITER & i, ""
-                    Else
-                        dictFeasibleItem.Add sChapter & DELIMITER & sItem, ""
-                    End If
-                Else
-                    'dictNotInProcess.Add sChapter & DELIMITER & sItem, ""
-                    'MsgBox "a"
-                End If
-                
-                If Len(sInProcess) <= 0 Then
-                    dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否在执行]为空", i
-                    GoTo next_sub_row
-                End If
-                If sInProcess = YES Then
-                    If sFeasible = YES Then
-                        If dictInProcessItem.Exists(sChapter & DELIMITER & sItem) Then
-                        '    dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "相同的执行要点,在同一个章节中出现了两次"
-                        Else
-                            dictInProcessItem.Add sChapter & DELIMITER & sItem, ""
-                        End If
-                    Else
-                        dictLog.Add sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & "[是否可执行]为[否],但是[是否在执行]却是[是], 前否不一致." & DELIMITER & i, ""
-                    End If
-                Else
-                   ' If sFeasible = YES Then
-                   If sChapter <> "章节" Then
-                        dictNotInProcess.Add sChapter & DELIMITER & sItem, sReason & DELIMITER & sAction
-                    End If
-                   ' End If
-                End If
-                
-next_sub_row:
-                dictAllItems(sFileBaseName & DELIMITER & sChapter & DELIMITER & sItem & DELIMITER & sFeasible & DELIMITER & sInProcess & DELIMITER & sReason & DELIMITER & sAction) = ""
-            Next
-            
-            lEachRow = lEndRow
-        Else
-            Set rgMerged = Nothing
-        End If
-next_row:
-    Next
-    
-    Debug.Print sFileBaseName & ", TotalItemCnt: " & lTotalItemCnt
-    
-    If lTotalItemCnt <> 0 Then
-        dblFeasibleRate = dictFeasibleItem.Count / lTotalItemCnt
-    Else
-        dblFeasibleRate = 0
-    End If
-    
-    If dictFeasibleItem.Count <> 0 Then
-        dblInprocessRate = dictInProcessItem.Count / lTotalItemCnt
-    Else
-        dblInprocessRate = 0
-    End If
-    
-    Set dictInProcessItem = Nothing
-    Set dictFeasibleItem = Nothing
-    fFillArrayByMergedCellsForSelf = dblFeasibleRate
 End Function
+
  
 
 Function fStrInDelimiteredStr(ByVal asAnswerStr As String, ByVal sEachAns As String, Optional sDeli As String = "|") As Integer

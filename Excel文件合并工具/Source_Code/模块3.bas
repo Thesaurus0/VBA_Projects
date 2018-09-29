@@ -3,39 +3,9 @@ Option Explicit
 
 Sub 브1()
 Attribute 브1.VB_ProcData.VB_Invoke_Func = " \n14"
-'
-' 브1 브
-'
-
-'
-    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
-    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
-    With Selection.Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .ThemeColor = 2
-        .TintAndShade = 0.249946592608417
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .ThemeColor = 2
-        .TintAndShade = 0.249946592608417
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .ThemeColor = 2
-        .TintAndShade = 0.249946592608417
-        .Weight = xlThin
-    End With
-    With Selection.Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .ThemeColor = 2
-        .TintAndShade = 0.249946592608417
-        .Weight = xlThin
-    End With
-    Selection.Borders(xlInsideVertical).LineStyle = xlNone
-    Selection.Borders(xlInsideHorizontal).LineStyle = xlNone
+    Dim a As WshShell
+     
+    
 End Sub
 Sub 브2()
 Attribute 브2.VB_ProcData.VB_Invoke_Func = " \n14"
